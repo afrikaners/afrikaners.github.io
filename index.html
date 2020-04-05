@@ -14,6 +14,7 @@
         .green{
             color: lightgreen;
             font-weight: 800;
+            font-size: smaller;
         }
     </style>
 </head>
@@ -24,6 +25,7 @@
 <h3>Total for today:</h3>
 <h3 id="powerTotal"></h3>
 <h3 id="skottelgoed" style="display:none" class="green">Skottelgoed Wasser</h3>
+<h3 id="oond" style="display:none" class="green">Oond</h3>
 <h3 id="wasmasjien"  style="display:none" class="green">Wasmasjien</h3>
 <h3 id="aircon" style="display:none" class="green">Aircon</h3>
 
@@ -75,8 +77,10 @@
                     }
                     if(integer > 2200){
                         $('#skottelgoed').show();
+                        $('#oond').show();
                     }else{
                         $('#skottelgoed').hide();
+                        $('#oond').hide();
                     }
                     if(integer > 3000){
                         $('#aircon').show();
