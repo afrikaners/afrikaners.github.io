@@ -16,14 +16,30 @@
 <h1 id="powerGen">Loading...</h1>
 <h3>Total for today:</h3>
 <h3 id="powerTotal"></h3>
+<input type="button" id="toggle" value="Wake Lock is disabled" />
 <script>
     $(document).ready(function(){
        
         load();
         document.body.requestFullscreen();
         var noSleep = new NoSleep();
-        noSleep.enable(); // keep the screen on!
-        
+
+        var wakeLockEnabled = false;
+        var toggleEl = document.querySelector("#toggle");
+        toggleEl.addEventListener('click', function() {
+            if (!wakeLockEnabled) {
+                noSleep.enable(); // keep the screen on!
+                wakeLockEnabled = true;
+                toggleEl.value = "Wake Lock is enabled";
+                //document.body.style.backgroundColor = "green";
+            } else {
+                noSleep.disable(); // let the screen turn off.
+                wakeLockEnabled = false;
+                toggleEl.value = "Wake Lock is disabled";
+                //document.body.style.backgroundColor = "";
+            }
+        }, false);
+
         function load(){
             $.get( "https://valuehold2.apphb.com/api/values", function( data ) {
             // alert( "Data Loaded: " +  );
