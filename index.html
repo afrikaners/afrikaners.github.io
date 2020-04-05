@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="mobile-web-app-capable" content="yes">
     <script type = "text/javascript"  src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type = "text/javascript"  src="nosleep.js"></script>
     <style>
@@ -12,16 +13,16 @@
     </style>
 </head>
 <body>
+<input type="button" id="toggle" value="Wake Lock is disabled" />
 <h1>Realtime Generation:</h1>
 <h1 id="powerGen">Loading...</h1>
 <h3>Total for today:</h3>
 <h3 id="powerTotal"></h3>
-<input type="button" id="toggle" value="Wake Lock is disabled" />
+
 <script>
     $(document).ready(function(){
        
         load();
-        document.body.requestFullscreen();
         var noSleep = new NoSleep();
 
         var wakeLockEnabled = false;
