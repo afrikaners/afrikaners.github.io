@@ -20,7 +20,10 @@
     $(document).ready(function(){
        
         load();
-
+        document.body.requestFullscreen();
+        var noSleep = new NoSleep();
+        noSleep.enable(); // keep the screen on!
+        
         function load(){
             $.get( "https://valuehold2.apphb.com/api/values", function( data ) {
             // alert( "Data Loaded: " +  );
