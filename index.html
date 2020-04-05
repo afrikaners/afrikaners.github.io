@@ -11,6 +11,10 @@
             color: white;
             font-size: 5vw;
         }
+        .green{
+            color: lightgreen;
+            font-weight: 800;
+        }
     </style>
 </head>
 <body>
@@ -19,6 +23,9 @@
 <h1 id="powerGen">Loading...</h1>
 <h3>Total for today:</h3>
 <h3 id="powerTotal"></h3>
+<h3 id="skottelgoed" style="display:none" class="green">Skottelgoed Wasser</h3>
+<h3 id="wasmasjien"  style="display:none" class="green">Wasmasjien</h3>
+<h3 id="aircon" style="display:none" class="green">Aircon</h3>
 
 <script>
     $(document).ready(function(){
@@ -44,6 +51,7 @@
         }, false);
 
         function load(){
+
             $.get( "https://valuehold2.apphb.com/api/values", function( data ) {
             // alert( "Data Loaded: " +  );
                 var dataString = JSON.stringify(data);
@@ -59,6 +67,23 @@
                 var integer = parseInt(powerGenVal,10);
                 if(integer > 1000){
                     $("#powerGen").text((integer/1000) + ' kW');
+
+                    if(integer > 1600){
+                        $('#wasmasjien').show();
+                    }else{
+                        $('#wasmasjien').hide();
+                    }
+                    if(integer > 2200){
+                        $('#skottelgoed').show();
+                    }else{
+                        $('#skottelgoed').hide();
+                    }
+                    if(integer > 3000){
+                        $('#aircon').show();
+                    }else{
+                        $('#aircon').hide();
+                    }
+
                 }else{
                     $("#powerGen").text(integer + ' w');
                 }
