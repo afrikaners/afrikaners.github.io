@@ -1,10 +1,51 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <script type = "text/javascript"  src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type = "text/javascript"  src="nosleep.js"></script>
+    <style>
+        body{
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
 <body>
+<h1>Realtime Generation:</h1>
+<h1 id="powerGen">Loading...</h1>
+<h3>Total for today:</h3>
+<h3 id="powerTotal"></h3>
+<script>
+    $(document).ready(function(){
+       
+        load();
 
-<h1>My First Heading</h1>
+        function load(){
+            $.get( "https://valuehold2.apphb.com/api/values", function( data ) {
+            // alert( "Data Loaded: " +  );
+                var dataString = JSON.stringify(data);
+                //console.log(dataString);
+                dataString = dataString.replace(/\\n/g, "");
+                dataString = dataString.replace(/\\/g, "");
+                dataString = dataString.replace(/ /g, '');
+                dataString = dataString.substring(1);
+                dataString = dataString.substring(0, dataString.length - 1);
 
-<p>My first paragraph.</p>
+                var obj = JSON.parse(dataString);
+                var powerGenVal = obj.Body.PAC.Values["1"];
+                var integer = parseInt(powerGenVal,10);
+                if(integer > 1000){
+                    $("#powerGen").text((integer/1000) + ' kW');
+                }else{
+                    $("#powerGen").text(integer + ' w');
+                }
 
+                $("#powerTotal").text(( obj.Body.DAY_ENERGY.Values["1"]/1000) + " kWh");
+                setTimeout(function(){load();}, 2000);
+            });
+        }
+
+    });
+</script>
 </body>
 </html>
