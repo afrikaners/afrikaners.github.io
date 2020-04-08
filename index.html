@@ -82,8 +82,18 @@
                         $('#skottelgoed').hide();
                         $('#oond').hide();
                     }
-                    if(integer > 3000){
+                    if(integer > 4000){
                         $('#aircon').show();
+                        $('#aircon').text("Aircon HIGH");
+                    }else if(integer > 3000){
+                        $('#aircon').show();
+                        $('#aircon').text("Aircon MEDIUM");
+                    }else if(integer > 2100){
+                        $('#aircon').show();
+                        $('#aircon').text("Aircon LOW");
+                    }else if(integer > 1500){
+                        $('#aircon').show();
+                        $('#aircon').text("Aircon FAN");
                     }else{
                         $('#aircon').hide();
                     }
