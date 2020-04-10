@@ -43,18 +43,16 @@
             </div>
             <div class="row">
                 <div class="col-xs-12">
-                    <div id="gauge"></div>
+                    <div style="width:400px;height:155px;overflow:hidden;" id="gauge"></div>
+                    <div style="width:100%;text-align:center;position:relative; top: -90px;">
+                        <h1 style="" id="powerGen">Loading...</h1>
+                        <h4 id="percentage"></h4>
+                    </div>
                 </div>
             </div>
             <div class="row" style="text-align:center">
                 <div class="col-xs-12">
-                    <h1 id="powerGen">Loading...</h1>
-                    <h4 id="percentage"></h4>
-                </div>
-            </div>
-            <div class="row" style="text-align:center">
-                <div class="col-xs-12">
-                    
+                   
                 </div>
             </div>
             <div class="row">
@@ -125,21 +123,18 @@
                 }
             }, false);
 
-try{
-    var gauge = new JustGage({
-            id: "gauge", // the id of the html element
-            value: 50,
-            min: 0,
-            max: 100,
-            decimals: 2,
-            gaugeWidthScale: 0.6
-        });
-
-        setTimeout(function () {  gauge.refresh(Math.random() * 100); }, 2000);
-
-}catch(ex){
-    $('#error').text(ex.message);
-}
+        try{
+            var gauge = new JustGage({
+                    id: "gauge", // the id of the html element
+                    value: 0,
+                    min: 0,
+                    max: 5,
+                    decimals: 2,
+                    gaugeWidthScale: 0.6
+                });
+        }catch(ex){
+            $('#error').text(ex.message);
+        }
            
 
             function loadWeather(){
@@ -204,6 +199,7 @@ try{
 
                         var gaugeVal = integer / 1000;
                         //gauge.set(gaugeVal); 
+                        gauge.refresh(gaugeVal);
                         if(gaugeVal>0){
                             $('#percentage').text((gaugeVal/5*100).toFixed(2)+"%");
                         }else{
