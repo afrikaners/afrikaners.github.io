@@ -125,8 +125,10 @@
                     min: 0,
                     max: 100,
                     decimals: 2,
+                    levelColors: ["#ff0000", "#f9c802", "#a9d70b"],
                     gaugeWidthScale: 0.6
                 });
+                //gauge.refresh(24);
         }catch(ex){
             $('#error').text(ex.message);
         }
@@ -193,14 +195,12 @@
                         }
 
                         var gaugeVal = (integer / 1000)/5*100;
-                        //gauge.set(gaugeVal); 
                         gauge.refresh(gaugeVal);
                         if(gaugeVal>0){
                             $('#percentage').text("("+gaugeVal.toFixed(2)+"%)");
                         }else{
                             $('#percentage').text("(0%)");
                         }
-                       
 
                         $("#powerTotal").text((obj.Body.DAY_ENERGY.Values["1"] / 1000) + " kWh");
                         setTimeout(function () { load(); }, 6000);
