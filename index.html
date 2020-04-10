@@ -77,6 +77,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <input type="button" id="toggle" value="Wake Lock is disabled" />
+                    <div id="error"></div>
                 </div>
             </div>
 
@@ -124,7 +125,8 @@
                 }
             }, false);
 
-            var gauge = new JustGage({
+try{
+    var gauge = new JustGage({
             id: "gauge", // the id of the html element
             value: 50,
             min: 0,
@@ -133,10 +135,12 @@
             gaugeWidthScale: 0.6
         });
 
-// update the value randomly
-setInterval(() => {
-  gauge.refresh(Math.random() * 100);
-}, 5000)
+        setTimeout(function () {  gauge.refresh(Math.random() * 100); }, 2000);
+
+}catch(ex){
+    $('#error').text(ex.message);
+}
+           
 
             function loadWeather(){
                 try{
