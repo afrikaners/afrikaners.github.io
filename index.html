@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
         integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script>
     <script type="text/javascript" src="nosleep.js"></script>
     <style>
         body {
@@ -41,9 +42,27 @@
             </div>
             <div class="row">
                 <div class="col-xs-12">
+                    <canvas width="760" height="300" id="foo" style="width: 380px; height: 150px;"></canvas>
+                </div>
+            </div>
+            <div class="row" style="text-align:center">
+                <div class="col-xs-12">
                     <h1 id="powerGen">Loading...</h1>
+                    <h4 id="percentage"></h4>
+                </div>
+            </div>
+            <div class="row" style="text-align:center">
+                <div class="col-xs-12">
+                    
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    
+                   
                     <h3>Total for today:</h3>
                     <h3 id="powerTotal"></h3>
+                    
                 </div>
             </div>
             <div class="row">
@@ -104,6 +123,31 @@
                 }
             }, false);
 
+            var opts = {
+                angle: 0, // The span of the gauge arc
+                lineWidth: 0.2, // The line thickness
+                radiusScale: 1, // Relative radius
+                pointer: {
+                    length: 0.52, // // Relative to gauge radius
+                    strokeWidth: 0.071, // The thickness
+                    color: '#FFD86B' // Fill color
+                },
+                limitMax: false,     // If false, max value increases automatically if value > maxValue
+                limitMin: false,     // If true, the min value of the gauge will be fixed
+                colorStart: '#FF0F0F',   // Colors
+                colorStop: '#8FC0DA',    // just experiment with them
+                strokeColor: '#FFFF',  // to see which ones work best for you
+                generateGradient: true,
+                highDpiSupport: true,     // High resolution support
+            
+            };
+            var target = document.getElementById('foo'); // your canvas element
+            var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+            gauge.maxValue = 5; // set max gauge value
+            gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+            gauge.animationSpeed = 46; // set animation speed (32 is default value)
+           //gauge.set(1050); // set actual value
+
             function loadWeather(){
                 try{
                     console.log('reloading weather...');
@@ -163,6 +207,15 @@
                         } else {
                             $("#powerGen").text(integer + ' w');
                         }
+
+                        var gaugeVal = integer / 1000;
+                        gauge.set(gaugeVal); 
+                        if(gaugeVal>0){
+                            $('#percentage').text((gaugeVal/5*100).toFixed(2)+"%");
+                        }else{
+                            $('#percentage').text("0%");
+                        }
+                       
 
                         $("#powerTotal").text((obj.Body.DAY_ENERGY.Values["1"] / 1000) + " kWh");
                         setTimeout(function () { load(); }, 6000);
