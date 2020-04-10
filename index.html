@@ -1,131 +1,154 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta name="mobile-web-app-capable" content="yes">
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-    <script type = "text/javascript"  src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script type = "text/javascript"  src="nosleep.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+        integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="nosleep.js"></script>
     <style>
-        body{
+        body {
             height: 4000px;
             background-color: black;
             color: white;
-            font-size: 5vw;
         }
-        .green{
+
+        .green {
             color: lightgreen;
-            font-weight: 800;
-            font-size: smaller;
         }
 
         /* Small devices (tablets, 768px and up) */
-        @media (min-width: @screen-sm-min) { 
-
-         }
+        @media (min-width: @screen-sm-min) {}
 
         /* Medium devices (desktops, 992px and up) */
-        @media (min-width: @screen-md-min) { 
-
-         }
+        @media (min-width: @screen-md-min) {}
 
         /* Large devices (large desktops, 1200px and up) */
-        @media (min-width: @screen-lg-min) { 
-            
-         }
+        @media (min-width: @screen-lg-min) {}
     </style>
 </head>
+
 <body>
-<input type="button" id="toggle" value="Wake Lock is disabled" />
-<h1>Realtime Generation:</h1>
-<h1 id="powerGen">Loading...</h1>
-<h3>Total for today:</h3>
-<h3 id="powerTotal"></h3>
-<h3 id="skottelgoed" style="display:none" class="green">Skottelgoed Wasser</h3>
-<h3 id="oond" style="display:none" class="green">Oond</h3>
-<h3 id="wasmasjien"  style="display:none" class="green">Wasmasjien</h3>
-<h3 id="aircon" style="display:none" class="green">Aircon</h3>
 
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
-<script>
-    $(document).ready(function(){
-       
-        load();
-        var noSleep = new NoSleep();
+    <div class="row">
+        <div class="col-xs-1">&nbsp;</div>
+        <div class="col-xs-11 col-sm-5 col-md-7"><h1>Realtime Generation:</h1></div>
+        <div class="col-xs-6 col-md-4">&nbsp;</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-1">&nbsp;</div>
+        <div class="col-xs-11 col-sm-5 col-md-7">
+            <h1 id="powerGen">Loading...</h1>
+            <h3>Total for today:</h3>
+            <h3 id="powerTotal"></h3>
+        </div>
+        <div class="col-xs-6 col-md-4">&nbsp;</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-1">&nbsp;</div>
+        <div class="col-xs-11 col-sm-5 col-md-7">
+            <h1 id="skottelgoed" style="display:none" class="green">Skottelgoed Wasser</h1>
+            <h1 id="oond" style="display:none" class="green">Oond</h1>
+            <h1 id="wasmasjien" style="display:none" class="green">Wasmasjien</h1>
+            <h1 id="aircon" style="display:none" class="green">Aircon</h1>
+        </div>
+        <div class="col-xs-6 col-md-4">&nbsp;</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-1">&nbsp;</div>
+        <div class="col-xs-11 col-sm-5 col-md-7">
+            <input type="button" id="toggle" value="Wake Lock is disabled" />
+        </div>
+        <div class="col-xs-6 col-md-4">&nbsp;</div>
+    </div>
 
-        var wakeLockEnabled = false;
-        var toggleEl = document.querySelector("#toggle");
-        toggleEl.addEventListener('click', function() {
-            if (!wakeLockEnabled) {
-                noSleep.enable(); // keep the screen on!
-                wakeLockEnabled = true;
-                toggleEl.value = "Wake Lock is enabled";
-                document.getElementById("toggle").style.display = "none";
-                //document.body.style.backgroundColor = "green";
-            } else {
-                noSleep.disable(); // let the screen turn off.
-                wakeLockEnabled = false;
-                toggleEl.value = "Wake Lock is disabled";
-                //document.body.style.backgroundColor = "";
-            }
-        }, false);
+    
 
-        function load(){
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
+        integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+        crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function () {
 
-            $.get( "https://valuehold2.apphb.com/api/values", function( data ) {
-            // alert( "Data Loaded: " +  );
-                var dataString = JSON.stringify(data);
-                //console.log(dataString);
-                dataString = dataString.replace(/\\n/g, "");
-                dataString = dataString.replace(/\\/g, "");
-                dataString = dataString.replace(/ /g, '');
-                dataString = dataString.substring(1);
-                dataString = dataString.substring(0, dataString.length - 1);
+            load();
+            var noSleep = new NoSleep();
 
-                var obj = JSON.parse(dataString);
-                var powerGenVal = obj.Body.PAC.Values["1"];
-                var integer = parseInt(powerGenVal,10);
-                if(integer > 1000){
-                    $("#powerGen").text((integer/1000) + ' kW');
-
-                    if(integer > 1600){
-                        $('#wasmasjien').show();
-                    }else{
-                        $('#wasmasjien').hide();
-                    }
-                    if(integer > 2200){
-                        $('#skottelgoed').show();
-                        $('#oond').show();
-                    }else{
-                        $('#skottelgoed').hide();
-                        $('#oond').hide();
-                    }
-                    if(integer > 4000){
-                        $('#aircon').show();
-                        $('#aircon').text("Aircon HIGH");
-                    }else if(integer > 3000){
-                        $('#aircon').show();
-                        $('#aircon').text("Aircon MEDIUM");
-                    }else if(integer > 2100){
-                        $('#aircon').show();
-                        $('#aircon').text("Aircon LOW");
-                    }else if(integer > 1500){
-                        $('#aircon').show();
-                        $('#aircon').text("Aircon FAN ONLY");
-                    }else{
-                        $('#aircon').hide();
-                    }
-
-                }else{
-                    $("#powerGen").text(integer + ' w');
+            var wakeLockEnabled = false;
+            var toggleEl = document.querySelector("#toggle");
+            toggleEl.addEventListener('click', function () {
+                if (!wakeLockEnabled) {
+                    noSleep.enable(); // keep the screen on!
+                    wakeLockEnabled = true;
+                    toggleEl.value = "Wake Lock is enabled";
+                    document.getElementById("toggle").style.display = "none";
+                    //document.body.style.backgroundColor = "green";
+                } else {
+                    noSleep.disable(); // let the screen turn off.
+                    wakeLockEnabled = false;
+                    toggleEl.value = "Wake Lock is disabled";
+                    //document.body.style.backgroundColor = "";
                 }
+            }, false);
 
-                $("#powerTotal").text(( obj.Body.DAY_ENERGY.Values["1"]/1000) + " kWh");
-                setTimeout(function(){load();}, 6000);
-            });
-        }
+            function load() {
 
-    });
-</script>
+                $.get("https://valuehold2.apphb.com/api/values", function (data) {
+                    // alert( "Data Loaded: " +  );
+                    var dataString = JSON.stringify(data);
+                    //console.log(dataString);
+                    dataString = dataString.replace(/\\n/g, "");
+                    dataString = dataString.replace(/\\/g, "");
+                    dataString = dataString.replace(/ /g, '');
+                    dataString = dataString.substring(1);
+                    dataString = dataString.substring(0, dataString.length - 1);
+
+                    var obj = JSON.parse(dataString);
+                    var powerGenVal = obj.Body.PAC.Values["1"];
+                    var integer = parseInt(powerGenVal, 10);
+                    if (integer > 1000) {
+                        $("#powerGen").text((integer / 1000) + ' kW');
+
+                        if (integer > 1600) {
+                            $('#wasmasjien').show();
+                        } else {
+                            $('#wasmasjien').hide();
+                        }
+                        if (integer > 2200) {
+                            $('#skottelgoed').show();
+                            $('#oond').show();
+                        } else {
+                            $('#skottelgoed').hide();
+                            $('#oond').hide();
+                        }
+                        if (integer > 4000) {
+                            $('#aircon').show();
+                            $('#aircon').text("Aircon HIGH");
+                        } else if (integer > 3000) {
+                            $('#aircon').show();
+                            $('#aircon').text("Aircon MEDIUM");
+                        } else if (integer > 2100) {
+                            $('#aircon').show();
+                            $('#aircon').text("Aircon LOW");
+                        } else if (integer > 1500) {
+                            $('#aircon').show();
+                            $('#aircon').text("Aircon FAN ONLY");
+                        } else {
+                            $('#aircon').hide();
+                        }
+
+                    } else {
+                        $("#powerGen").text(integer + ' w');
+                    }
+
+                    $("#powerTotal").text((obj.Body.DAY_ENERGY.Values["1"] / 1000) + " kWh");
+                    setTimeout(function () { load(); }, 6000);
+                });
+            }
+
+        });
+    </script>
 </body>
+
 </html>
