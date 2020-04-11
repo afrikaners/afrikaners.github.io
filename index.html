@@ -52,11 +52,12 @@
                 <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
                 <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
                 <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
+                <li id="savings" class="tab"><a href="#" onclick="changeTab('savings');">Savings</a></li>
                 <li id="settings" class="tab"><a href="#" onclick="changeTab('settings');">Settings</a></li>
               </ul>
         </div>
       </nav>
-    <div id="homeSection" class="row">
+    <div id="homeSection" class="row section">
         <div class="col-xs-1">&nbsp;</div>
         <div class="col-xs-5" >
             
@@ -99,16 +100,16 @@
 
         </div>
     </div>
-    <div id="pvOutputSection" style="display:none;" class="row">
+    <div id="pvOutputSection" style="display:none;" class="row section">
         <div class="col-xs-12">
             <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="4000" frameborder="0"  scrolling="no"></iframe>
         </div>
     </div>
-    <div id="settingsSection" style="display:none;" class="row">
+    <div id="settingsSection" style="display:none;" class="row section">
         <div class="col-xs-12">
             <div class="row">
                 <div class="col-xs-12">
-                    <input type="button" id="toggle" value="Wake Lock is disabled" />
+                    <input type="button" id="toggle" value="Wake Lock is disabled" /><br/>
                     <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" />
                     <div id="error"></div>
                 </div>
@@ -129,6 +130,7 @@
         var airconThresholdBreachCounter = 0;
         var maxNotifications = 10;
         var notificationCounter = 0;
+        var timeout = 6000;
 
         try{
             Papa.parse("https://afrikaners.github.io/record.csv", {
@@ -271,6 +273,11 @@
                         } else {
                             checkAndSendAirconThresholdNotification(integer);
                             $("#powerGen").text(integer + ' w');
+                            if(integer == 0){
+                                timeout = 600000; // 10 mins;
+                            }else{
+                                timeout = 6000; // 6 seconds
+                            }
                         }
 
                         var gaugeVal = ((integer / 1000)/5*100).toFixed(2);
@@ -304,10 +311,10 @@
                         }
                         
 
-                        setTimeout(function () { load(); }, 6000);
+                        setTimeout(function () { load(); }, timeout);
                     });
                 }catch(ex){
-                    setTimeout(function () { load(); }, 6000);
+                    setTimeout(function () { load(); }, timeout);
                 }
             }
 
@@ -420,23 +427,18 @@
 
         function changeTab(mode){
             $('li.tab').removeClass('active');
-
+            $('#pvOutputIframe').attr('src','');
+            $('div.section').hide();
             if(mode === 'home'){
                 $('#homeSection').show();
-                $('#pvOutputSection').hide();
                 $('#home').addClass('active');
-                $('#settingsSection').hide();
-                //$('#pvOutput').removeClass('active');
+                
             }else if(mode === 'settings'){
                 $('#settingsSection').show();
-                $('#homeSection').hide();
-                $('#pvOutputSection').hide();
                 $('#settings').addClass('active');
             }else{
                 $('#pvOutputIframe').hide();
                 $('#pvOutputSection').show();
-                $('#homeSection').hide();
-                $('#settingsSection').hide();
                 
                 if(mode === 'pvOutput'){
                     $('#pvOutput').addClass('active');
@@ -449,6 +451,10 @@
                 else if(mode === 'pvOutputDaily'){
                     $('#pvOutputDaily').addClass('active');
                     $('#pvOutputIframe').attr('src','https://pvoutput.org/list.jsp?id=84198&sid=74658');
+                }
+                else if(mode === 'savings'){
+                    $('#savings').addClass('active');
+                    $('#pvOutputIframe').attr('src', 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3adaAnQqZe2ir_9gZRnGzKk4s-VPEliTOyJjUjNOlPlM6wzN2a3jOE8XqHyrXS_f9AHECmNqhWb8_/pubchart?oid=1336524382&amp;format=interactive');
                 }
 
                 $('#pvOutputIframe').show();
