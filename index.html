@@ -129,7 +129,6 @@
                 download: true,
                 complete: function(results) {
                     recordData = results.data;
-                    alert(recordData.length);
                 }
             });
         }catch(ex){
@@ -304,33 +303,33 @@
             
         }
 
-        // function getRecordPowerGeneratedForNow(){
-        //     if(!recordData){
-        //         console.log('recordData not loaded');
-        //         return;
-        //     }
+        function getRecordPowerGeneratedForNow(){
+            if(!recordData){
+                console.log('recordData not loaded');
+                return;
+            }
 
-        //     var now = new Date();
-        //     var closest5Min = Math.ceil(now.getMinutes()/5)*5;
-        //     now.setMinutes(closest5Min);
-        //     var key = formatAMPM(now);
-        //     console.log(key);
+            var now = new Date();
+            var closest5Min = Math.ceil(now.getMinutes()/5)*5;
+            now.setMinutes(closest5Min);
+            var key = formatAMPM(now);
+            console.log(key);
             
-        //     return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
-        // }
+            return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
+        }
         
         
 
-        // function formatAMPM(date) {
-        //     var hours = date.getHours();
-        //     var minutes = date.getMinutes();
-        //     var ampm = hours >= 12 ? 'PM' : 'AM';
-        //     hours = hours % 12;
-        //     hours = hours ? hours : 12; // the hour '0' should be '12'
-        //     minutes = minutes < 10 ? '0'+minutes : minutes;
-        //     var strTime = hours + ':' + minutes + '' + ampm;
-        //     return strTime;
-        // }
+        function formatAMPM(date) {
+            var hours = date.getHours();
+            var minutes = date.getMinutes();
+            var ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            var strTime = hours + ':' + minutes + '' + ampm;
+            return strTime;
+        }
 
         function changeTab(mode){
             $('li.tab').removeClass('active');
