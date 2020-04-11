@@ -19,6 +19,9 @@
             background-color: black;
             color: white;
         }
+        html{
+            background-color: black;
+        }
 
         .green {
             color: lightgreen;
@@ -44,7 +47,7 @@
     </style>
 </head>
 
-<body>
+<body id="body">
     <nav class="navbar navbar-inverse navbar-static-top">
         <div class="container">
             <ul class="nav navbar-nav">
@@ -131,6 +134,7 @@
         var maxNotifications = 10;
         var notificationCounter = 0;
         var timeout = 6000;
+
 
         try{
             Papa.parse("https://afrikaners.github.io/record.csv", {
@@ -274,8 +278,16 @@
                             checkAndSendAirconThresholdNotification(integer);
                             $("#powerGen").text(integer + ' w');
                             if(integer == 0){
+
+                                if(new Date().getHours() >= 22){
+                                    $('#body').hide();
+                                    $('html').on('click', function(){$('#body').show();});
+                                }
+                                
                                 timeout = 600000; // 10 mins;
                             }else{
+                                $('#body').show();
+                                $('html').on('click', function(){});
                                 timeout = 6000; // 6 seconds
                             }
                         }
