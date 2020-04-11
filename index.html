@@ -95,6 +95,7 @@
         integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
         crossorigin="anonymous"></script>
     <script>
+        var gauge;
         $(document).ready(function () {
 
             load();
@@ -119,13 +120,13 @@
             }, false);
 
         try{
-            var gauge = new JustGage({
+            gauge = new JustGage({
                     id: "gauge", // the id of the html element
                     value: 0,
                     min: 0,
                     max: 100,
                     decimals: 2,
-                    levelColors: ["#ff0000", "#f9c802", "#a9d70b"],
+                    levelColors: ["#ff0000", "#f9c802", "#00b800"],
                     gaugeWidthScale: 0.6
                 });
                 //gauge.refresh(24);
@@ -194,14 +195,16 @@
                             $("#powerGen").text(integer + ' w');
                         }
 
-                        var gaugeVal = (integer / 1000)/5*100;
+                        var gaugeVal = ((integer / 1000)/5*100).toFixed(2);
                         gauge.refresh(gaugeVal);
+                        setGauge(gaugeVal);
+                        
                         if(gaugeVal>0){
-                            $('#percentage').text("("+gaugeVal.toFixed(2)+"%)");
+                            $('#percentage').text("("+gaugeVal+"%)");
                         }else{
                             $('#percentage').text("(0%)");
                         }
-
+                    
                         $("#powerTotal").text((obj.Body.DAY_ENERGY.Values["1"] / 1000) + " kWh");
                         setTimeout(function () { load(); }, 6000);
                     });
@@ -211,6 +214,38 @@
             }
 
         });
+
+        var mode = "NORMAL";
+        function setGauge(value){
+            if(value > 100 && mode !== "MAXIMUS"){
+                console.log("maxi");
+                mode = "MAXIMUS"
+                gauge = new JustGage({
+                    id: "gauge", // the id of the html element
+                    value: value,
+                    min: 0,
+                    max: 100,
+                    decimals: 2,
+                    levelColors: ["#ff0000", "#f9c802", "#a9d70b", "#0083d6"],
+                    gaugeWidthScale: 0.6
+                });
+            }else if(value <= 100 && mode !== "NORMAL"){
+                console.log("normal");
+                mode = "NORMAL;"
+                gauge = new JustGage({
+                    id: "gauge", // the id of the html element
+                    value: value,
+                    min: 0,
+                    max: 100,
+                    decimals: 2,
+                    levelColors: ["#ff0000", "#f9c802", "#00b800"],
+                    gaugeWidthScale: 0.6
+                });
+            }else{
+                gauge.refresh(value);
+            }
+            
+        }
     </script>
 </body>
 
