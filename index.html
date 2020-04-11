@@ -52,6 +52,7 @@
                 <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
                 <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
                 <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
+                <li id="settings" class="tab"><a href="#" onclick="changeTab('settings');">Settings</a></li>
               </ul>
         </div>
       </nav>
@@ -88,12 +89,6 @@
                     <h1 id="aircon" style="display:none" class="green">Aircon</h1>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <input type="button" id="toggle" value="Wake Lock is disabled" />
-                    <div id="error"></div>
-                </div>
-            </div>
 
         </div>
         <div class="col-xs-6">
@@ -109,13 +104,17 @@
             <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="4000" frameborder="0"  scrolling="no"></iframe>
         </div>
     </div>
-
-
-   
-   
-    
-
-    
+    <div id="settingsSection" style="display:none;" class="row">
+        <div class="col-xs-12">
+            <div class="row">
+                <div class="col-xs-12">
+                    <input type="button" id="toggle" value="Wake Lock is disabled" />
+                    <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" />
+                    <div id="error"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
         integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
@@ -123,6 +122,13 @@
     <script>
         var gauge;
         var recordData;
+
+        var queryString = new Array();
+        var newHighAlertSent = false;
+        var notifyAirconThreshold = false;
+        var airconThresholdBreachCounter = 0;
+        var maxNotifications = 10;
+        var notificationCounter = 0;
 
         try{
             Papa.parse("https://afrikaners.github.io/record.csv", {
@@ -136,6 +142,21 @@
         }
 
         $(document).ready(function () {
+            if (queryString.length == 0) {
+                if (window.location.search.split('?').length > 1) {
+                    var params = window.location.search.split('?')[1].split('&');
+                    for (var i = 0; i < params.length; i++) {
+                        var key = params[i].split('=')[0];
+                        var value = decodeURIComponent(params[i].split('=')[1]);
+                        queryString[key] = value;
+                    }
+                }
+            }
+
+            $('#notifyAircon').click(function(){
+                notifyAirconThreshold = !notifyAirconThreshold;
+                $('#notifyAircon').attr('value', 'Notify Aircon Threshold: ' + notifyAirconThreshold);
+            });
 
             load();
             loadWeather();
@@ -148,7 +169,7 @@
                     noSleep.enable(); // keep the screen on!
                     wakeLockEnabled = true;
                     toggleEl.value = "Wake Lock is enabled";
-                    document.getElementById("toggle").style.display = "none";
+                    //document.getElementById("toggle").style.display = "none";
                     //document.body.style.backgroundColor = "green";
                 } else {
                     noSleep.disable(); // let the screen turn off.
@@ -181,6 +202,17 @@
                     setTimeout(function () { loadWeather(); }, 900000);
                 }catch(ex){
                     setTimeout(function () { loadWeather(); }, 900000);
+                }
+            }
+
+            function checkAndSendAirconThresholdNotification(powerGenLevel){
+                if(notifyAirconThreshold && airconThresholdBreachCounter == 4){
+                    notifyAirconThreshold = false; 
+                    airconThresholdBreachCounter = 0;
+                    $('#notifyAircon').attr('value', 'Notify Aircon Threshold: ' + notifyAirconThreshold);
+                    sendNotification("Aircon Threshold alert", "Solar below Aircon ON threshold. (" + powerGenLevel + " w)");
+                }else if(notifyAirconThreshold){
+                    airconThresholdBreachCounter ++;
                 }
             }
 
@@ -218,13 +250,18 @@
                             if (integer > 4000) {
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon HIGH");
+                                airconThresholdBreachCounter = 0;
                             } else if (integer > 3000) {
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon MEDIUM");
+                                airconThresholdBreachCounter = 0;
                             } else if (integer > 2100) {
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon LOW");
+                                airconThresholdBreachCounter = 0;
                             } else if (integer > 1500) {
+                                checkAndSendAirconThresholdNotification(integer);
+                                airconThresholdBreachCounter ++;
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon FAN ONLY");
                             } else {
@@ -232,6 +269,7 @@
                             }
 
                         } else {
+                            checkAndSendAirconThresholdNotification(integer);
                             $("#powerGen").text(integer + ' w');
                         }
 
@@ -251,10 +289,14 @@
                         
                         var powerTotalText = $("#powerTotal").text();
                         
-                        var recordGenerated = getRecordPowerGeneratedForNow();
+                        var recordGenerated = getRecordPowerGeneratedForNow(integer);
                         if(recordGenerated){
                             recordGenerated = recordGenerated.replace('kWh','');
                             if(kWhTotalGenerated > recordGenerated){
+                                if(!newHighAlertSent){
+                                    newHighAlertSent = true;
+                                    sendNotification("Fronius", "New highest daily record!");
+                                }
                                 $("#powerTotal").html(powerTotalText + ' <span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
                             }else{
                                 $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(-' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
@@ -303,10 +345,14 @@
             
         }
 
-        function getRecordPowerGeneratedForNow(){
+        function getRecordPowerGeneratedForNow(powerGenCurrent){
             if(recordData === undefined){
                 console.log('recordData not loaded');
                 return;
+            }
+
+            if(powerGenCurrent == 0){
+                return recordData[0][2];
             }
 
             var now = new Date();
@@ -339,6 +385,39 @@
             return strTime;
         }
 
+        function sendNotification(title, message){
+            if(!queryString["key"]){
+                return;
+            }
+            if(notificationCounter > maxNotifications){
+                return;
+            }else if(notificationCounter == maxNotifications){
+                title = "MAX NOTIFICATIONS REACHED! - " + title;
+            }
+
+            var userKey =  queryString["key"];
+            var data = {
+                "token": "a5bp7hm1aosnsj3nthoozw75jsdhf9",
+                "user": userKey,
+                "title": title,
+                "message": message
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "https://api.pushover.net/1/messages.json",
+                data: data,
+                success: function(){},
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    notificationCounter++;
+                    return response;
+                }
+            });
+        }
+
         function changeTab(mode){
             $('li.tab').removeClass('active');
 
@@ -346,11 +425,18 @@
                 $('#homeSection').show();
                 $('#pvOutputSection').hide();
                 $('#home').addClass('active');
+                $('#settingsSection').hide();
                 //$('#pvOutput').removeClass('active');
+            }else if(mode === 'settings'){
+                $('#settingsSection').show();
+                $('#homeSection').hide();
+                $('#pvOutputSection').hide();
+                $('#settings').addClass('active');
             }else{
                 $('#pvOutputIframe').hide();
                 $('#pvOutputSection').show();
                 $('#homeSection').hide();
+                $('#settingsSection').hide();
                 
                 if(mode === 'pvOutput'){
                     $('#pvOutput').addClass('active');
