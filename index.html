@@ -36,8 +36,10 @@
     <nav class="navbar navbar-inverse navbar-static-top">
         <div class="container">
             <ul class="nav navbar-nav">
-                <li id="home" class="active" onclick="changeTab('home');"><a href="#">Home</a></li>
-                <li id="pvOutput"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
+                <li id="home" class="active tab" onclick="changeTab('home');"><a href="#">Home</a></li>
+                <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
+                <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
+                <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
               </ul>
         </div>
       </nav>
@@ -260,17 +262,31 @@
         }
 
         function changeTab(mode){
+            $('li.tab').removeClass('active');
+
             if(mode === 'home'){
                 $('#homeSection').show();
                 $('#pvOutputSection').hide();
                 $('#home').addClass('active');
-                $('#pvOutput').removeClass('active');
+                //$('#pvOutput').removeClass('active');
             }else{
-                $('#homeSection').hide();
+              
                 $('#pvOutputSection').show();
-                $('#home').removeClass('active');
-                $('#pvOutput').addClass('active');
-                $('#pvOutputIframe').attr('src','https://pvoutput.org/intraday.jsp?id=84198&sid=74658');
+                $('#homeSection').hide();
+                
+                if(mode === 'pvOutput'){
+                    $('#pvOutput').addClass('active');
+                    $('#pvOutputIframe').attr('src','https://pvoutput.org/intraday.jsp?id=84198&sid=74658');
+                }
+                else if(mode === 'pvOutputRecord'){
+                    $('#pvOutputRecord').addClass('active');
+                    $('#pvOutputIframe').attr('src','https://pvoutput.org/intraday.jsp?id=84198&sid=74658&dt=20200409&gs=0&m=0');
+                }    
+                else if(mode === 'pvOutputDaily'){
+                    $('#pvOutputDaily').addClass('active');
+                    $('#pvOutputIframe').attr('src','https://pvoutput.org/list.jsp?id=84198&sid=74658');
+                }
+                    
             }
         }
     </script>
