@@ -251,15 +251,15 @@
                         
                         var powerTotalText = $("#powerTotal").text();
                         
-                        // var recordGenerated = getRecordPowerGeneratedForNow();
-                        // if(recordGenerated){
-                        //     recordGenerated = recordGenerated.replace('kWh','');
-                        //     if(kWhTotalGenerated > recordGenerated){
-                        //         $("#powerTotal").html(powerTotalText + ' <span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
-                        //     }else{
-                        //         $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(-' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
-                        //     }
-                        // }
+                        var recordGenerated = getRecordPowerGeneratedForNow();
+                        if(recordGenerated){
+                            recordGenerated = recordGenerated.replace('kWh','');
+                            if(kWhTotalGenerated > recordGenerated){
+                                $("#powerTotal").html(powerTotalText + ' <span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
+                            }else{
+                                $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(-' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
+                            }
+                        }
                         
 
                         setTimeout(function () { load(); }, 6000);
@@ -313,7 +313,8 @@
             var closest5Min = Math.ceil(now.getMinutes()/5)*5;
             now.setMinutes(closest5Min);
             var key = formatAMPM(now);
-            return recordData.find(x => x[1] === key) !== undefined ? recordData.find(x => x[1] === key)[2] : null;
+            return recordData[0][2];
+            //return recordData.find(x => x[1] === key) !== undefined ? recordData.find(x => x[1] === key)[2] : null;
         }
         
         
