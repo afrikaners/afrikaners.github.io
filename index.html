@@ -33,8 +33,15 @@
 </head>
 
 <body>
-
-    <div class="row">
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container">
+            <ul class="nav navbar-nav">
+                <li id="home" class="active" onclick="changeTab('home');"><a href="#">Home</a></li>
+                <li id="pvOutput"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
+              </ul>
+        </div>
+      </nav>
+    <div id="homeSection" class="row">
         <div class="col-xs-1">&nbsp;</div>
         <div class="col-xs-5" >
             
@@ -81,6 +88,11 @@
                 <div style="width: 500px;margin-top:30px;"><iframe id="weatherWidget" style="display: block;" src="" width="500" height="520" frameborder="0"  scrolling="no"></iframe><a style="text-indent: -9999em;position: relative;z-index: 1;display: block;margin: -20px 0 0 0;height: 20px" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Weather info for Yanchep</a></div>
             </div>
 
+        </div>
+    </div>
+    <div id="pvOutputSection" style="display:none;" class="row">
+        <div class="col-xs-12">
+            <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="768" frameborder="0"  scrolling="no"></iframe>
         </div>
     </div>
 
@@ -245,6 +257,21 @@
                 gauge.refresh(value);
             }
             
+        }
+
+        function changeTab(mode){
+            if(mode === 'home'){
+                $('#homeSection').show();
+                $('#pvOutputSection').hide();
+                $('#home').addClass('active');
+                $('#pvOutput').removeClass('active');
+            }else{
+                $('#homeSection').hide();
+                $('#pvOutputSection').show();
+                $('#home').removeClass('active');
+                $('#pvOutput').addClass('active');
+                $('#pvOutputIframe').attr('src','https://pvoutput.org/intraday.jsp?id=84198&sid=74658');
+            }
         }
     </script>
 </body>
