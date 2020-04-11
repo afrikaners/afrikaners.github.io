@@ -10,6 +10,8 @@
     <script type="text/javascript" src="raphael.min.js"></script>
     <script type="text/javascript" src="justgage.min.js"></script>
     <script type="text/javascript" src="nosleep.js"></script>
+    <script type="text/javascript" src="papaparse.min.js"></script>
+    
     <style>
         body {
             height: 4000px;
@@ -19,6 +21,15 @@
 
         .green {
             color: lightgreen;
+        }
+
+        .newRecord{
+            font-size: smaller;
+            color:green;
+        }
+        .noRecord{
+            font-size: smaller;
+            color:red;
         }
 
         /* Small devices (tablets, 768px and up) */
@@ -174,6 +185,7 @@
                         var obj = JSON.parse(dataString);
                         var powerGenVal = obj.Body.PAC.Values["1"];
                         var integer = parseInt(powerGenVal, 10);
+                        
                         if (integer > 1000) {
                             $("#powerGen").text((integer / 1000) + ' kW');
 
@@ -219,7 +231,23 @@
                             $('#percentage').text("0%");
                         }
                     
-                        $("#powerTotal").text((obj.Body.DAY_ENERGY.Values["1"] / 1000) + " kWh");
+                        var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
+                        $("#powerTotal").text((kWhTotalGenerated) + " kWh");
+
+                        
+                        var powerTotalText = $("#powerTotal").text();
+                        
+                        var recordGenerated = getRecordPowerGeneratedForNow();
+                        if(recordGenerated){
+                            recordGenerated = recordGenerated.replace('kWh','');
+                            if(kWhTotalGenerated > recordGenerated){
+                                $("#powerTotal").html(powerTotalText + ' <span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
+                            }else{
+                                $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(-' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
+                            }
+                        }
+                        
+
                         setTimeout(function () { load(); }, 6000);
                     });
                 }catch(ex){
@@ -259,6 +287,44 @@
                 gauge.refresh(value);
             }
             
+        }
+
+        Papa.parse("http://afrikaners.github.io/record.csv", {
+            download: true,
+            complete: function(results) {
+                console.log(results.data);
+                recordData = results.data;
+            }
+        });
+    
+        var recordData;
+
+        function getRecordPowerGeneratedForNow(){
+            if(!recordData){
+                console.log('recordData not loaded');
+                return;
+            }
+
+            var now = new Date();
+            var closest5Min = Math.ceil(now.getMinutes()/5)*5;
+            now.setMinutes(closest5Min);
+            var key = formatAMPM(now);
+            console.log(key);
+            
+            return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
+        }
+        
+        
+
+        function formatAMPM(date) {
+            var hours = date.getHours();
+            var minutes = date.getMinutes();
+            var ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            var strTime = hours + ':' + minutes + '' + ampm;
+            return strTime;
         }
 
         function changeTab(mode){
