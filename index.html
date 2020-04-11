@@ -55,7 +55,7 @@
                     <div style="width:400px;height:155px;overflow:hidden;" id="gauge"></div>
                     <div style="width:100%;text-align:center;position:relative; top: -90px;">
                         <h1 style="" id="powerGen">Loading...</h1>
-                        <h4 id="percentage"></h4>
+                        <h4 style="position:relative;top:-80px;" id="percentage"></h4>
                     </div>
                 </div>
             </div>
@@ -214,9 +214,9 @@
                         setGauge(gaugeVal);
                         
                         if(gaugeVal>0){
-                            $('#percentage').text("("+gaugeVal+"%)");
+                            $('#percentage').text(gaugeVal+"%");
                         }else{
-                            $('#percentage').text("(0%)");
+                            $('#percentage').text("0%");
                         }
                     
                         $("#powerTotal").text((obj.Body.DAY_ENERGY.Values["1"] / 1000) + " kWh");
