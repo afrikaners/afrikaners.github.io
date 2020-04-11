@@ -11,6 +11,7 @@
     <script type="text/javascript" src="justgage.min.js"></script>
     <script type="text/javascript" src="nosleep.js"></script>
     <!-- <script type="text/javascript" src="papaparse.js"></script> -->
+    <script type="text/javascript" src="jquery.csv.min.js"></script> 
     
     <style>
         body {
@@ -59,7 +60,7 @@
         <div class="col-xs-5" >
             
             <div class="row">
-                <div class="col-xs-12"><h1>Realtime Generation:</h1></div>
+                <div class="col-xs-12"><h1>Realtime Generation:.</h1></div>
             </div>
             <div class="row" style="height:155px;overflow:hidden;">
                 <div class="col-xs-12">
@@ -123,16 +124,16 @@
         var gauge;
         var recordData;
 
-        try{
-            Papa.parse("https://afrikaners.github.io/record.csv", {
-                download: true,
-                complete: function(results) {
-                    recordData = results.data;
-                }
-            });
-        }catch(ex){
-            console.log(ex);
-        }
+        // try{
+        //     Papa.parse("https://afrikaners.github.io/record.csv", {
+        //         download: true,
+        //         complete: function(results) {
+        //             recordData = results.data;
+        //         }
+        //     });
+        // }catch(ex){
+        //     console.log(ex);
+        // }
 
         $(document).ready(function () {
 
@@ -250,15 +251,15 @@
                         
                         var powerTotalText = $("#powerTotal").text();
                         
-                        var recordGenerated = getRecordPowerGeneratedForNow();
-                        if(recordGenerated){
-                            recordGenerated = recordGenerated.replace('kWh','');
-                            if(kWhTotalGenerated > recordGenerated){
-                                $("#powerTotal").html(powerTotalText + ' <span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
-                            }else{
-                                $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(-' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
-                            }
-                        }
+                        // var recordGenerated = getRecordPowerGeneratedForNow();
+                        // if(recordGenerated){
+                        //     recordGenerated = recordGenerated.replace('kWh','');
+                        //     if(kWhTotalGenerated > recordGenerated){
+                        //         $("#powerTotal").html(powerTotalText + ' <span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
+                        //     }else{
+                        //         $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(-' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
+                        //     }
+                        // }
                         
 
                         setTimeout(function () { load(); }, 6000);
@@ -302,33 +303,33 @@
             
         }
 
-        function getRecordPowerGeneratedForNow(){
-            if(!recordData){
-                console.log('recordData not loaded');
-                return;
-            }
+        // function getRecordPowerGeneratedForNow(){
+        //     if(!recordData){
+        //         console.log('recordData not loaded');
+        //         return;
+        //     }
 
-            var now = new Date();
-            var closest5Min = Math.ceil(now.getMinutes()/5)*5;
-            now.setMinutes(closest5Min);
-            var key = formatAMPM(now);
-            console.log(key);
+        //     var now = new Date();
+        //     var closest5Min = Math.ceil(now.getMinutes()/5)*5;
+        //     now.setMinutes(closest5Min);
+        //     var key = formatAMPM(now);
+        //     console.log(key);
             
-            return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
-        }
+        //     return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
+        // }
         
         
 
-        function formatAMPM(date) {
-            var hours = date.getHours();
-            var minutes = date.getMinutes();
-            var ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
-            minutes = minutes < 10 ? '0'+minutes : minutes;
-            var strTime = hours + ':' + minutes + '' + ampm;
-            return strTime;
-        }
+        // function formatAMPM(date) {
+        //     var hours = date.getHours();
+        //     var minutes = date.getMinutes();
+        //     var ampm = hours >= 12 ? 'PM' : 'AM';
+        //     hours = hours % 12;
+        //     hours = hours ? hours : 12; // the hour '0' should be '12'
+        //     minutes = minutes < 10 ? '0'+minutes : minutes;
+        //     var strTime = hours + ':' + minutes + '' + ampm;
+        //     return strTime;
+        // }
 
         function changeTab(mode){
             $('li.tab').removeClass('active');
