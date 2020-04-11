@@ -121,6 +121,19 @@
         crossorigin="anonymous"></script>
     <script>
         var gauge;
+        var recordData;
+
+        try{
+            Papa.parse("https://afrikaners.github.io/record.csv", {
+                download: true,
+                complete: function(results) {
+                    recordData = results.data;
+                }
+            });
+        }catch(ex){
+            console.log(ex);
+        }
+
         $(document).ready(function () {
 
             load();
@@ -288,16 +301,6 @@
             }
             
         }
-
-        Papa.parse("https://afrikaners.github.io/record.csv", {
-            download: true,
-            complete: function(results) {
-                console.log(results.data);
-                recordData = results.data;
-            }
-        });
-    
-        var recordData;
 
         function getRecordPowerGeneratedForNow(){
             if(!recordData){
