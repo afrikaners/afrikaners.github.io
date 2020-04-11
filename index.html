@@ -313,7 +313,16 @@
             var closest5Min = Math.ceil(now.getMinutes()/5)*5;
             now.setMinutes(closest5Min);
             var key = formatAMPM(now);
-            return recordData[0][2];
+
+            for (var i = 0; i < recordData.length; i++) {
+                var obj = recordData[i];
+                if(obj[2] === key){
+                    return obj[2];
+                }
+            }
+
+            return null;
+           
             //return recordData.find(x => x[1] === key) !== undefined ? recordData.find(x => x[1] === key)[2] : null;
         }
         
