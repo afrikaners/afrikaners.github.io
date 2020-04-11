@@ -94,7 +94,7 @@
     </div>
     <div id="pvOutputSection" style="display:none;" class="row">
         <div class="col-xs-12">
-            <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="768" frameborder="0"  scrolling="no"></iframe>
+            <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="4000" frameborder="0"  scrolling="no"></iframe>
         </div>
     </div>
 
@@ -270,7 +270,7 @@
                 $('#home').addClass('active');
                 //$('#pvOutput').removeClass('active');
             }else{
-              
+                $('#pvOutputIframe').hide();
                 $('#pvOutputSection').show();
                 $('#homeSection').hide();
                 
@@ -286,6 +286,8 @@
                     $('#pvOutputDaily').addClass('active');
                     $('#pvOutputIframe').attr('src','https://pvoutput.org/list.jsp?id=84198&sid=74658');
                 }
+
+                $('#pvOutputIframe').show();
                     
             }
         }
