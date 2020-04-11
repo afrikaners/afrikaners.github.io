@@ -48,7 +48,7 @@
     <nav class="navbar navbar-inverse navbar-static-top">
         <div class="container">
             <ul class="nav navbar-nav">
-                <li id="home" class="active tab" onclick="changeTab('home');"><a href="#">Home</a></li>
+                <li id="home" class="active tab" onclick="changeTab('home');"><a href="#">Home.</a></li>
                 <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
                 <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
                 <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
@@ -303,20 +303,20 @@
             
         }
 
-        // function getRecordPowerGeneratedForNow(){
-        //     if(!recordData){
-        //         console.log('recordData not loaded');
-        //         return;
-        //     }
+        function getRecordPowerGeneratedForNow(){
+            if(recordData === undefined){
+                console.log('recordData not loaded');
+                return;
+            }
 
-        //     var now = new Date();
-        //     var closest5Min = Math.ceil(now.getMinutes()/5)*5;
-        //     now.setMinutes(closest5Min);
-        //     var key = formatAMPM(now);
-        //     console.log(key);
+            var now = new Date();
+            var closest5Min = Math.ceil(now.getMinutes()/5)*5;
+            now.setMinutes(closest5Min);
+            var key = formatAMPM(now);
+            return null;
             
-        //     return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
-        // }
+            //return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
+        }
         
         
 
