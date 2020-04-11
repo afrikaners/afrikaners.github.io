@@ -124,16 +124,17 @@
         var gauge;
         var recordData;
 
-        // try{
-        //     Papa.parse("https://afrikaners.github.io/record.csv", {
-        //         download: true,
-        //         complete: function(results) {
-        //             recordData = results.data;
-        //         }
-        //     });
-        // }catch(ex){
-        //     console.log(ex);
-        // }
+        try{
+            Papa.parse("https://afrikaners.github.io/record.csv", {
+                download: true,
+                complete: function(results) {
+                    recordData = results.data;
+                    alert(recordData.length);
+                }
+            });
+        }catch(ex){
+            console.log(ex);
+        }
 
         $(document).ready(function () {
 
