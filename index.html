@@ -303,20 +303,20 @@
             
         }
 
-        function getRecordPowerGeneratedForNow(){
-            if(!recordData){
-                console.log('recordData not loaded');
-                return;
-            }
+        // function getRecordPowerGeneratedForNow(){
+        //     if(!recordData){
+        //         console.log('recordData not loaded');
+        //         return;
+        //     }
 
-            var now = new Date();
-            var closest5Min = Math.ceil(now.getMinutes()/5)*5;
-            now.setMinutes(closest5Min);
-            var key = formatAMPM(now);
-            console.log(key);
+        //     var now = new Date();
+        //     var closest5Min = Math.ceil(now.getMinutes()/5)*5;
+        //     now.setMinutes(closest5Min);
+        //     var key = formatAMPM(now);
+        //     console.log(key);
             
-            return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
-        }
+        //     return recordData.find(x => x[1] === key) ? recordData.find(x => x[1] === key)[2] : null;
+        // }
         
         
 
