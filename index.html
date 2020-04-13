@@ -6,6 +6,7 @@
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
         integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+        
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="raphael.min.js"></script>
     <script type="text/javascript" src="justgage.min.js"></script>
@@ -34,6 +35,21 @@
         .noRecord{
             font-size: smaller;
             color:red;
+        }
+
+        .progress-bar-danger{
+            background-color:greenyellow !important;
+        }
+
+        .progress {
+            height:50px;
+        }
+
+        #powerTotal{
+            position:absolute;
+            top: 50px;
+            left: 25px;
+            color:black;
         }
 
         /* Small devices (tablets, 768px and up) */
@@ -82,7 +98,12 @@
                    
                     <h3>Total for today:</h3>
                     <h3 id="powerTotal"></h3>
-                    
+                    <div class="progress">
+                        <div id="progressStandard" class="progress-bar progress-bar-success" style="width: 99%">
+                        </div>
+                        <div id="progressBeyond" style="display:none" class="progress-bar progress-bar-danger" style="width: 1%">
+                        </div>
+                      </div>
                 </div>
             </div>
             <div class="row">
@@ -96,9 +117,15 @@
 
         </div>
         <div class="col-xs-6">
-
+            <div class="row" id="airconStatus" style="display:none">
+                <div class="col-xs-12">
+                    <p style="color:green">Aircon is aan.</p>
+                </div>
+            </div>
             <div class="row">
-                <div style="width: 500px;margin-top:30px;"><iframe id="weatherWidget" style="display: block;" src="" width="500" height="520" frameborder="0"  scrolling="no"></iframe><a style="text-indent: -9999em;position: relative;z-index: 1;display: block;margin: -20px 0 0 0;height: 20px" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Weather info for Yanchep</a></div>
+                <div class="col-xs-12">
+                    <div style="width: 500px;margin-top:30px;"><iframe id="weatherWidget" style="display: block;" src="" width="500" height="520" frameborder="0"  scrolling="no"></iframe><a style="text-indent: -9999em;position: relative;z-index: 1;display: block;margin: -20px 0 0 0;height: 20px" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Weather info for Yanchep</a></div>
+                </div>
             </div>
 
         </div>
@@ -114,6 +141,7 @@
                 <div class="col-xs-12">
                     <input type="button" id="toggle" value="Wake Lock is disabled" /><br/>
                     <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" />
+                    <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" />
                     <div id="error"></div>
                 </div>
             </div>
@@ -131,9 +159,24 @@
         var newHighAlertSent = false;
         var notifyAirconThreshold = false;
         var airconThresholdBreachCounter = 0;
+        var monitorAirconStatus = 1;
         var maxNotifications = 10;
         var notificationCounter = 0;
         var timeout = 6000;
+
+        var airconMonthEstimates = new Array();
+        airconMonthEstimates[0] = 40.9;
+        airconMonthEstimates[1] = 37.4;
+        airconMonthEstimates[2] = 32.6;
+        airconMonthEstimates[3] =  27;
+        airconMonthEstimates[4] = 20.3;
+        airconMonthEstimates[5] = 18.4;
+        airconMonthEstimates[6] = 19.7;
+        airconMonthEstimates[7] = 22.6;
+        airconMonthEstimates[8] = 28.1;
+        airconMonthEstimates[9] = 33.8;
+        airconMonthEstimates[10] = 35.3;
+        airconMonthEstimates[11] = 38.8 ;
 
 
         try{
@@ -164,8 +207,20 @@
                 $('#notifyAircon').attr('value', 'Notify Aircon Threshold: ' + notifyAirconThreshold);
             });
 
+            $('#monitorAirconStatus').click(function(){
+                monitorAirconStatus = !monitorAirconStatus;
+                $('#monitorAirconStatus').attr('value', 'Monitor Aircon Status: ' + monitorAirconStatus);
+                if(monitorAirconStatus)
+                    setTimeout(airconStatus, 6000);
+                else
+                    $("#airconStatus").hide();
+            });
+
+            
+
             load();
             loadWeather();
+            airconStatus();
             var noSleep = new NoSleep();
 
             var wakeLockEnabled = false;
@@ -222,8 +277,24 @@
                 }
             }
 
+            function airconStatus(){
+                if(!monitorAirconStatus)
+                    return;
+                $.get("http://valuehold2.apphb.com/api/aircon", function (data) {
+                    console.log(data);
+                    if(data === "ON")
+                        $("#airconStatus").show();
+                    else
+                        $("#airconStatus").hide();
+
+                    setTimeout(airconStatus, 6000);
+                });
+            }
+
             function load() {
                 try{
+                    
+                   
                     $.get("https://valuehold2.apphb.com/api/values", function (data) {
                         // alert( "Data Loaded: " +  );
                         var dataString = JSON.stringify(data);
@@ -303,6 +374,7 @@
                         }
                     
                         var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
+                        setProgress(kWhTotalGenerated);
                         $("#powerTotal").text((kWhTotalGenerated) + " kWh");
 
                         
@@ -331,6 +403,24 @@
             }
 
         });
+
+        function setProgress(kWh){
+            var now = new Date();
+            var monthExpected = airconMonthEstimates[now.getMonth()];
+
+            if(kWh <= monthExpected){
+                $('#progressBeyond').hide();
+                var percentage = (kWh/monthExpected*100);
+                $('#progressStandard').attr('style', 'width: ' + percentage + '%');
+
+            }else{
+                $('#progressBeyond').show();
+                var percentage = (kWh/(kWh+monthExpected)*100);
+                $('#progressStandard').attr('style', 'width: ' + percentage + '%');
+                $('#progressBeyond').attr('style', 'width: ' + (100-percentage) + '%');
+                console.log(percentage);
+            }
+        }
 
         var mode = "NORMAL";
         function setGauge(value){
