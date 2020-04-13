@@ -416,7 +416,9 @@
 
             if(kWh <= monthExpected){
                 $('#progressBeyond').hide();
-                var percentage = (kWh/monthExpected*100);
+                var percentage = 0
+                if(kWh>0)
+                    percentage = (kWh/monthExpected*100);
                 $('#progressStandard').attr('style', 'width: ' + percentage + '%');
                 $('#overGenerated').hide();
             }else{
