@@ -42,14 +42,21 @@
         }
 
         .progress {
-            height:50px;
+            height:30px;
         }
 
         #powerTotal{
             position:absolute;
-            top: 50px;
+            top: 38px;
             left: 25px;
             color:black;
+        }
+
+        #overGenerated{
+            position:absolute;
+            color:black;
+            right:20px;
+            top:61px;
         }
 
         /* Small devices (tablets, 768px and up) */
@@ -97,6 +104,7 @@
                     
                    
                     <h3>Total for today:</h3>
+                    <p id="overGenerated" style="display:none">0</p>
                     <h3 id="powerTotal"></h3>
                     <div class="progress">
                         <div id="progressStandard" class="progress-bar progress-bar-success" style="width: 99%">
@@ -168,7 +176,7 @@
         airconMonthEstimates[0] = 40.9;
         airconMonthEstimates[1] = 37.4;
         airconMonthEstimates[2] = 32.6;
-        airconMonthEstimates[3] =  27;
+        airconMonthEstimates[3] = 29 //27;
         airconMonthEstimates[4] = 20.3;
         airconMonthEstimates[5] = 18.4;
         airconMonthEstimates[6] = 19.7;
@@ -258,7 +266,6 @@
 
             function loadWeather(){
                 try{
-                    console.log('reloading weather...');
                     $('#weatherWidget').attr('src', "https://cdnres.willyweather.com.au/widget/loadView.html?id=57109");
                     setTimeout(function () { loadWeather(); }, 900000);
                 }catch(ex){
@@ -281,7 +288,6 @@
                 if(!monitorAirconStatus)
                     return;
                 $.get("http://valuehold2.apphb.com/api/aircon", function (data) {
-                    console.log(data);
                     if(data === "ON")
                         $("#airconStatus").show();
                     else
@@ -412,20 +418,20 @@
                 $('#progressBeyond').hide();
                 var percentage = (kWh/monthExpected*100);
                 $('#progressStandard').attr('style', 'width: ' + percentage + '%');
-
+                $('#overGenerated').hide();
             }else{
                 $('#progressBeyond').show();
-                var percentage = (kWh/(kWh+monthExpected)*100);
+                var percentage = (kWh/(kWh-monthExpected+kWh)*100);
                 $('#progressStandard').attr('style', 'width: ' + percentage + '%');
                 $('#progressBeyond').attr('style', 'width: ' + (100-percentage) + '%');
-                console.log(percentage);
+                $('#overGenerated').text((kWh-monthExpected).toFixed(1));
+                $('#overGenerated').show();
             }
         }
 
         var mode = "NORMAL";
         function setGauge(value){
             if(value > 100 && mode !== "MAXIMUS"){
-                console.log("maxi");
                 mode = "MAXIMUS"
                 gauge = new JustGage({
                     id: "gauge", // the id of the html element
@@ -437,7 +443,6 @@
                     gaugeWidthScale: 0.6
                 });
             }else if(value <= 100 && mode !== "NORMAL"){
-                console.log("normal");
                 mode = "NORMAL";
                 gauge = new JustGage({
                     id: "gauge", // the id of the html element
