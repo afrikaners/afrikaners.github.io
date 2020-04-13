@@ -3,11 +3,15 @@
 
 <head>
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
         integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-        
+           
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
+        integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+        crossorigin="anonymous"></script>
     <script type="text/javascript" src="raphael.min.js"></script>
     <script type="text/javascript" src="justgage.min.js"></script>
     <script type="text/javascript" src="nosleep.js"></script>
@@ -58,107 +62,101 @@
             right:20px;
             top:61px;
         }
-
-        /* Small devices (tablets, 768px and up) */
-        @media (min-width: @screen-sm-min) {}
-
-        /* Medium devices (desktops, 992px and up) */
-        @media (min-width: @screen-md-min) {}
-
-        /* Large devices (large desktops, 1200px and up) */
-        @media (min-width: @screen-lg-min) {}
     </style>
 </head>
 
 <body id="body">
-    <nav class="navbar navbar-inverse navbar-static-top">
-        <div class="container">
-            <ul class="nav navbar-nav">
-                <li id="home" class="active tab" onclick="changeTab('home');"><a href="#">Home</a></li>
-                <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
-                <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
-                <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
-                <li id="savings" class="tab"><a href="#" onclick="changeTab('savings');">Savings</a></li>
-                <li id="settings" class="tab"><a href="#" onclick="changeTab('settings');">Settings</a></li>
-              </ul>
-        </div>
-      </nav>
-    <div id="homeSection" class="row section">
-        <div class="col-xs-1">&nbsp;</div>
-        <div class="col-xs-5" >
-            
-            <div class="row">
-                <div class="col-xs-12"><h1>Realtime Generation:</h1></div>
+    <div class="container-fluid" style="padding:0;">
+       
+        <nav class="navbar navbar-inverse navbar-static-top">
+            <div class="container">
+                <ul class="nav navbar-nav">
+                    <li id="home" class="active tab" onclick="changeTab('home');"><a href="#">Home</a></li>
+                    <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
+                    <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
+                    <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
+                    <li id="savings" class="tab"><a href="#" onclick="changeTab('savings');">Savings</a></li>
+                    <li id="settings" class="tab"><a href="#" onclick="changeTab('settings');">Settings</a></li>
+                  </ul>
             </div>
-            <div class="row" style="height:155px;overflow:hidden;">
-                <div class="col-xs-12">
-                    <div style="width:400px;height:155px;overflow:hidden;" id="gauge"></div>
-                    <div style="width:100%;text-align:center;position:relative; top: -90px;">
-                        <h1 style="" id="powerGen">Loading...</h1>
-                        <h4 style="position:relative;top:-80px;" id="percentage"></h4>
+          </nav>
+
+        <div id="homeSection" class="row section">
+            <div class="col-md-6 col-sm-6" style="padding-left:40px;padding-right:40px;">
+                
+                <div class="row">
+                    <div class="col-xs-12"><h1>Realtime Generation:</h1></div>
+                </div>
+                <div class="row" style="height:155px;overflow:hidden;">
+                    <div class="col-xs-12">
+                        <div style="width:400px;height:155px;overflow:hidden;" id="gauge"></div>
+                        <div style="width:100%;text-align:left;position:absolute; top: 30px; left:130px">
+                            <h1 style="top:40px;left:10px;position:absolute;" id="powerGen">Loading...</h1>
+                            <h4 style="position:absolute;top:10px;left:60px;" id="percentage"></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        
+                       
+                        <h3>Total for today:</h3>
+                        <p id="overGenerated" style="display:none">0</p>
+                        <h3 id="powerTotal"></h3>
+                        <div class="progress">
+                            <div id="progressStandard" class="progress-bar progress-bar-success" style="width: 99%">
+                            </div>
+                            <div id="progressBeyond" style="display:none" class="progress-bar progress-bar-danger" style="width: 1%">
+                            </div>
+                          </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h1 id="skottelgoed" style="display:none" class="green">Skottelgoed Wasser</h1>
+                        <h1 id="oond" style="display:none" class="green">Oond</h1>
+                        <h1 id="wasmasjien" style="display:none" class="green">Wasmasjien</h1>
+                        <h1 id="aircon" style="display:none" class="green">Aircon</h1>
+                    </div>
+                </div>
+    
+            </div>
+            <div class="col-md-6 col-sm-6" style="padding-right:20px;">
+                <div class="row" id="airconStatus" style="display:none">
+                    <div class="col-xs-12">
+                        <p style="color:green">Aircon is aan.</p>
+                    </div>
+                </div>
+                <div class="row" style="display:inline">
+                    <div class="col-xs-12">
+                        <div style="width: 450px;margin-top:30px;"><iframe id="weatherWidget" style="display: block;" src="" width="450" height="520" frameborder="0"  scrolling="no"></iframe><a style="text-indent: -9999em;position: relative;z-index: 1;display: block;margin: -20px 0 0 0;height: 20px" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Weather info for Yanchep</a></div>
+                    </div>
+                </div>
+    
+            </div>
+        </div>
+        <div id="pvOutputSection" style="display:none;" class="row section">
+            <div class="col-xs-12">
+                <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="4000" frameborder="0"  scrolling="no"></iframe>
+            </div>
+        </div>
+        <div id="settingsSection" style="display:none;" class="row section">
+            <div class="col-xs-12">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <input type="button" id="toggle" value="Wake Lock is disabled" /><br/>
+                        <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" />
+                        <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" />
+                        <div id="error"></div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    
-                   
-                    <h3>Total for today:</h3>
-                    <p id="overGenerated" style="display:none">0</p>
-                    <h3 id="powerTotal"></h3>
-                    <div class="progress">
-                        <div id="progressStandard" class="progress-bar progress-bar-success" style="width: 99%">
-                        </div>
-                        <div id="progressBeyond" style="display:none" class="progress-bar progress-bar-danger" style="width: 1%">
-                        </div>
-                      </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <h1 id="skottelgoed" style="display:none" class="green">Skottelgoed Wasser</h1>
-                    <h1 id="oond" style="display:none" class="green">Oond</h1>
-                    <h1 id="wasmasjien" style="display:none" class="green">Wasmasjien</h1>
-                    <h1 id="aircon" style="display:none" class="green">Aircon</h1>
-                </div>
-            </div>
+        </div>
 
-        </div>
-        <div class="col-xs-6">
-            <div class="row" id="airconStatus" style="display:none">
-                <div class="col-xs-12">
-                    <p style="color:green">Aircon is aan.</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div style="width: 500px;margin-top:30px;"><iframe id="weatherWidget" style="display: block;" src="" width="500" height="520" frameborder="0"  scrolling="no"></iframe><a style="text-indent: -9999em;position: relative;z-index: 1;display: block;margin: -20px 0 0 0;height: 20px" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Weather info for Yanchep</a></div>
-                </div>
-            </div>
+    </div>
+    
 
-        </div>
-    </div>
-    <div id="pvOutputSection" style="display:none;" class="row section">
-        <div class="col-xs-12">
-            <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="4000" frameborder="0"  scrolling="no"></iframe>
-        </div>
-    </div>
-    <div id="settingsSection" style="display:none;" class="row section">
-        <div class="col-xs-12">
-            <div class="row">
-                <div class="col-xs-12">
-                    <input type="button" id="toggle" value="Wake Lock is disabled" /><br/>
-                    <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" />
-                    <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" />
-                    <div id="error"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
-        integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
-        crossorigin="anonymous"></script>
+    
     <script>
         var gauge;
         var recordData;
@@ -389,14 +387,16 @@
                         var recordGenerated = getRecordPowerGeneratedForNow(integer);
                         if(recordGenerated){
                             recordGenerated = recordGenerated.replace('kWh','');
-                            if(kWhTotalGenerated > recordGenerated){
+                            var now = new Date();
+                            //don't trigger before 4pm.
+                            if(now.getHours() >= 16 && kWhTotalGenerated > recordGenerated){
                                 if(!newHighAlertSent){
                                     newHighAlertSent = true;
                                     sendNotification("Fronius", "New highest daily record!");
                                 }
                                 $("#powerTotal").html(powerTotalText + ' <span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
                             }else{
-                                $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(-' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
+                                $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
                             }
                         }
                         
