@@ -82,7 +82,7 @@
           </nav>
 
         <div id="homeSection" class="row section">
-            <div class="col-md-6 col-sm-6" style="padding-left:40px;padding-right:40px;">
+            <div id="busyHours" class="col-md-6 col-sm-6" style="padding-left:40px;padding-right:40px;">
                 
                 <div class="row">
                     <div class="col-xs-12"><h1>Realtime Generation:</h1></div>
@@ -120,6 +120,17 @@
                     </div>
                 </div>
     
+            </div>
+            <div id="afterhours" class="col-md-6 col-sm-6" style="padding-left:40px;padding-right:40px;" style="display:none">
+                
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h2>Total Generated Today</h2>
+                        <h3 id="dayEnd_TotalGenerated"></h3>
+                        <h2>Expected daily for this Month</h2>
+                        <h3 id="dayEnd_MonthExpected"></h3>
+                    </div>
+                </div>
             </div>
             <div class="col-md-6 col-sm-6" style="padding-right:20px;">
                 <div class="row" id="airconStatus" style="display:none">
@@ -353,16 +364,22 @@
                             checkAndSendAirconThresholdNotification(integer);
                             $("#powerGen").text(integer + ' w');
                             if(integer == 0){
-
+                                
                                 if(new Date().getHours() >= 22){
                                     $('#body').hide();
                                     $('html').on('click', function(){$('#body').show();});
+                                }else if(new Date().getHours() >= 18){
+                                    $('#afterhours').show();
+                                    $('#busyHours').hide();
                                 }
+
                                 
                                 timeout = 600000; // 10 mins;
                             }else{
                                 $('#body').show();
                                 $('html').on('click', function(){});
+                                $('#afterhours').hide();
+                                $('#busyHours').show();
                                 timeout = 6000; // 6 seconds
                             }
                         }
@@ -380,7 +397,14 @@
                         var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
                         setProgress(kWhTotalGenerated);
                         $("#powerTotal").text((kWhTotalGenerated) + " kWh");
+                        $("#dayEnd_TotalGenerated").text($('#powerTotal').text());
+                        $('#dayEnd_MonthExpected').text(monthExpected + ' kWh');
 
+                        if(kWhTotalGenerated <= monthExpected){
+                            $("#dayEnd_TotalGenerated").attr('style', 'color:red');
+                        }else{
+                            $("#dayEnd_TotalGenerated").attr('style', 'color:green');
+                        }
                         
                         var powerTotalText = $("#powerTotal").text();
                         
@@ -410,9 +434,10 @@
 
         });
 
+        var monthExpected;
         function setProgress(kWh){
             var now = new Date();
-            var monthExpected = airconMonthEstimates[now.getMonth()];
+            monthExpected = airconMonthEstimates[now.getMonth()];
 
             if(kWh <= monthExpected){
                 $('#progressBeyond').hide();
