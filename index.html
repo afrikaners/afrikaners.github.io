@@ -323,6 +323,14 @@
                         var obj = JSON.parse(dataString);
                         var powerGenVal = obj.Body.PAC.Values["1"];
                         var integer = parseInt(powerGenVal, 10);
+
+                        if(integer == 0 && new Date().getHours() >= 18){
+                            $('#afterhours').show();
+                            $('#busyHours').hide();
+                        }else{
+                            $('#afterhours').hide();
+                            $('#busyHours').show();
+                        }
                         
                         if (integer > 1000) {
                             $("#powerGen").text((integer / 1000) + ' kW');
@@ -365,15 +373,11 @@
                             $("#powerGen").text(integer + ' w');
                             if(integer == 0){
                                 
-                                if(new Date().getHours() >= 22){
+                                if(new Date().getHours() >= 21){
                                     $('#body').hide();
                                     $('html').on('click', function(){$('#body').show();});
-                                }else if(new Date().getHours() >= 18){
-                                    $('#afterhours').show();
-                                    $('#busyHours').hide();
                                 }
 
-                                
                                 timeout = 600000; // 10 mins;
                             }else{
                                 $('#body').show();
