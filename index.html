@@ -285,7 +285,7 @@
             function airconStatus(){
                 if(!monitorAirconStatus)
                     return;
-                $.get("http://valuehold2.apphb.com/api/aircon", function (data) {
+                $.get("https://valuehold2.apphb.com/api/aircon", function (data) {
                     if(data === "ON")
                         $("#airconStatus").show();
                     else
