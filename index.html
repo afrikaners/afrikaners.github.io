@@ -592,7 +592,8 @@
                 }
                 else if(mode === 'savings'){
                     $('#savings').addClass('active');
-                    $('#pvOutputIframe').attr('src', 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3adaAnQqZe2ir_9gZRnGzKk4s-VPEliTOyJjUjNOlPlM6wzN2a3jOE8XqHyrXS_f9AHECmNqhWb8_/pubchart?oid=1336524382&amp;format=interactive');
+                    
+                    $('#pvOutputIframe').attr('src', 'https://valuehold2.apphb.com/api/graph?oid='+queryString["oid"]);
                 }
 
                 $('#pvOutputIframe').show();
