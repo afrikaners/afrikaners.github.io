@@ -55,6 +55,11 @@
             left: 25px;
             color:black;
         }
+        #powerTotalFromRecord{
+            position:absolute;
+            top: 65px;
+            color:black;
+        }
 
         #overGenerated{
             position:absolute;
@@ -103,6 +108,7 @@
                         <h3>Total for today:</h3>
                         <p id="overGenerated" style="display:none">0</p>
                         <h3 id="powerTotal"></h3>
+                        <h3 id="powerTotalFromRecord"></h3>
                         <div class="progress">
                             <div id="progressStandard" class="progress-bar progress-bar-success" style="width: 99%">
                             </div>
@@ -210,7 +216,7 @@
         $(document).ready(function () {
 
             try{
-                
+
                 if (queryString.length == 0) {
                     if (window.location.search.split('?').length > 1) {
                         var params = window.location.search.split('?')[1].split('&');
@@ -231,7 +237,7 @@
                     monitorAirconStatus = !monitorAirconStatus;
                     $('#monitorAirconStatus').attr('value', 'Monitor Aircon Status: ' + monitorAirconStatus);
                     if(monitorAirconStatus)
-                        setTimeout(airconStatus, 6000);
+                        setTimeout(airconStatus, timeout);
                     else
                         $("#airconStatus").hide();
                 });
@@ -309,7 +315,7 @@
                     else
                         $("#airconStatus").hide();
 
-                    setTimeout(airconStatus, 6000);
+                    setTimeout(airconStatus, timeout);
                 });
             }
 
@@ -406,8 +412,8 @@
                         }
                     
                         var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
-                        setProgress(kWhTotalGenerated);
-                        $("#powerTotal").text((kWhTotalGenerated) + " kWh");
+                        setProgress(kWhTotalGenerated, true);
+                        ////$("#powerTotal").text((kWhTotalGenerated) + " kWh");
                         $("#dayEnd_TotalGenerated").text($('#powerTotal').text());
                         $('#dayEnd_MonthExpected').text(monthExpected + ' kWh');
 
@@ -417,7 +423,7 @@
                             $("#dayEnd_TotalGenerated").attr('style', 'color:green');
                         }
                         
-                        var powerTotalText = $("#powerTotal").text();
+                        //var powerTotalText = $("#powerTotal").text();
                         
                         var recordGenerated = getRecordPowerGeneratedForNow(integer);
                         if(recordGenerated){
@@ -429,9 +435,9 @@
                                     newHighAlertSent = true;
                                     sendNotification("Fronius", "New highest daily record!");
                                 }
-                                $("#powerTotal").html(powerTotalText + ' <span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
+                                $("#powerTotalFromRecord").html('<span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
                             }else{
-                                $("#powerTotal").html(powerTotalText + ' <span class="noRecord">(' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
+                                $("#powerTotalFromRecord").html('<span class="noRecord">(' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
                             }
                         }
                         
@@ -446,7 +452,40 @@
         });
 
         var monthExpected;
-        function setProgress(kWh){
+        var newkWhMax;
+        var oldkWhMax = 0; //12
+        var progressTimeout;
+        var progressIncrements;
+        var progressCounter = 0;
+        var numberOfUpdates = 14;
+        var progressTimeoutInterval = 0;
+                            //13
+        function setProgress(kWh, resetProgressTimeout){
+            
+            if(oldkWhMax === 0){
+                oldkWhMax = kWh - 0.001;
+            }
+
+            if(resetProgressTimeout){
+                if(progressTimeout)
+                    clearTimeout(progressTimeout);
+
+                progressCounter = 0;
+                newKWhMax = kWh;
+
+                var diff = newKWhMax - oldkWhMax;
+                progressIncrements = 0;
+
+                progressTimeoutInterval = (timeout*2)/numberOfUpdates;
+                progressIncrements = diff/numberOfUpdates;
+                kWh = oldkWhMax + progressIncrements;
+            }
+
+            if(progressCounter == numberOfUpdates){
+                return;
+            }
+            progressCounter++;
+
             var now = new Date();
             monthExpected = airconMonthEstimates[now.getMonth()];
 
@@ -465,6 +504,13 @@
                 $('#overGenerated').text((kWh-monthExpected).toFixed(1));
                 $('#overGenerated').show();
             }
+
+            $("#powerTotal").text((kWh.toFixed(4)) + " kWh");
+
+  
+            oldkWhMax = kWh;
+            var newVal = kWh + progressIncrements;
+            progressTimeout = setTimeout(function(){ setProgress(newVal, false);  }, progressTimeoutInterval);
         }
 
         var mode = "NORMAL";
