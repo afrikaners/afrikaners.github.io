@@ -338,7 +338,7 @@
                         $.get("https://valuehold2.apphb.com/api/meds", function (data) {
                             if(data === false){
                                 sendNotification('Meds', "Boet, Drink jou medisyne!");
-                                medsReminderSent = true;
+                                medsAlertSent = new Date().getHours()  === 22;
                             }
                         });
                     }
