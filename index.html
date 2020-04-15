@@ -208,69 +208,76 @@
         }
 
         $(document).ready(function () {
-            if (queryString.length == 0) {
-                if (window.location.search.split('?').length > 1) {
-                    var params = window.location.search.split('?')[1].split('&');
-                    for (var i = 0; i < params.length; i++) {
-                        var key = params[i].split('=')[0];
-                        var value = decodeURIComponent(params[i].split('=')[1]);
-                        queryString[key] = value;
+
+            try{
+                
+                if (queryString.length == 0) {
+                    if (window.location.search.split('?').length > 1) {
+                        var params = window.location.search.split('?')[1].split('&');
+                        for (var i = 0; i < params.length; i++) {
+                            var key = params[i].split('=')[0];
+                            var value = decodeURIComponent(params[i].split('=')[1]);
+                            queryString[key] = value;
+                        }
                     }
                 }
-            }
 
-            $('#notifyAircon').click(function(){
-                notifyAirconThreshold = !notifyAirconThreshold;
-                $('#notifyAircon').attr('value', 'Notify Aircon Threshold: ' + notifyAirconThreshold);
-            });
-
-            $('#monitorAirconStatus').click(function(){
-                monitorAirconStatus = !monitorAirconStatus;
-                $('#monitorAirconStatus').attr('value', 'Monitor Aircon Status: ' + monitorAirconStatus);
-                if(monitorAirconStatus)
-                    setTimeout(airconStatus, 6000);
-                else
-                    $("#airconStatus").hide();
-            });
-
-            
-
-            load();
-            loadWeather();
-            airconStatus();
-            var noSleep = new NoSleep();
-
-            var wakeLockEnabled = false;
-            var toggleEl = document.querySelector("#toggle");
-            toggleEl.addEventListener('click', function () {
-                if (!wakeLockEnabled) {
-                    noSleep.enable(); // keep the screen on!
-                    wakeLockEnabled = true;
-                    toggleEl.value = "Wake Lock is enabled";
-                    //document.getElementById("toggle").style.display = "none";
-                    //document.body.style.backgroundColor = "green";
-                } else {
-                    noSleep.disable(); // let the screen turn off.
-                    wakeLockEnabled = false;
-                    toggleEl.value = "Wake Lock is disabled";
-                    //document.body.style.backgroundColor = "";
-                }
-            }, false);
-
-        try{
-            gauge = new JustGage({
-                    id: "gauge", // the id of the html element
-                    value: 0,
-                    min: 0,
-                    max: 100,
-                    decimals: 2,
-                    levelColors: ["#ff0000", "#f9c802", "#00b800"],
-                    gaugeWidthScale: 0.6
+                $('#notifyAircon').click(function(){
+                    notifyAirconThreshold = !notifyAirconThreshold;
+                    $('#notifyAircon').attr('value', 'Notify Aircon Threshold: ' + notifyAirconThreshold);
                 });
-                //gauge.refresh(24);
-        }catch(ex){
-            $('#error').text(ex.message);
-        }
+
+                $('#monitorAirconStatus').click(function(){
+                    monitorAirconStatus = !monitorAirconStatus;
+                    $('#monitorAirconStatus').attr('value', 'Monitor Aircon Status: ' + monitorAirconStatus);
+                    if(monitorAirconStatus)
+                        setTimeout(airconStatus, 6000);
+                    else
+                        $("#airconStatus").hide();
+                });
+
+                
+
+                load();
+                loadWeather();
+                airconStatus();
+                var noSleep = new NoSleep();
+
+                var wakeLockEnabled = false;
+                var toggleEl = document.querySelector("#toggle");
+                toggleEl.addEventListener('click', function () {
+                    if (!wakeLockEnabled) {
+                        noSleep.enable(); // keep the screen on!
+                        wakeLockEnabled = true;
+                        toggleEl.value = "Wake Lock is enabled";
+                        //document.getElementById("toggle").style.display = "none";
+                        //document.body.style.backgroundColor = "green";
+                    } else {
+                        noSleep.disable(); // let the screen turn off.
+                        wakeLockEnabled = false;
+                        toggleEl.value = "Wake Lock is disabled";
+                        //document.body.style.backgroundColor = "";
+                    }
+                }, false);
+
+                try{
+                    gauge = new JustGage({
+                            id: "gauge", // the id of the html element
+                            value: 0,
+                            min: 0,
+                            max: 100,
+                            decimals: 2,
+                            levelColors: ["#ff0000", "#f9c802", "#00b800"],
+                            gaugeWidthScale: 0.6
+                        });
+                        //gauge.refresh(24);
+                }catch(ex){
+                    $('#error').text(ex.message);
+                }
+
+            }catch(ex){
+                alert(ex.message);
+            }
            
 
             function loadWeather(){
