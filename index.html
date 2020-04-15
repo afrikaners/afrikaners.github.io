@@ -187,6 +187,9 @@
         var notificationCounter = 0;
         var timeout = 6000;
 
+        var medsReminderSent = false;
+        var medsAlertSent = false;
+
         var airconMonthEstimates = new Array();
         airconMonthEstimates[0] = 40.9;
         airconMonthEstimates[1] = 37.4;
@@ -322,6 +325,23 @@
             function load() {
                 try{
                     
+                    if(new Date().getHours()  === 10 && !medsReminderSent){
+                        $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                            if(data === false){
+                                sendNotification('Meds', "Boet, onthou jou medisyne!");
+                                medsReminderSent = true;
+                            }
+                        });
+                    }
+
+                    if((new Date().getHours()  === 20 || new Date().getHours()  === 21 || new Date().getHours()  === 22)  && !medsAlertSent){
+                        $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                            if(data === false){
+                                sendNotification('Meds', "Boet, Drink jou medisyne!");
+                                medsReminderSent = true;
+                            }
+                        });
+                    }
                    
                     $.get("https://valuehold2.apphb.com/api/values", function (data) {
                         // alert( "Data Loaded: " +  );
@@ -333,114 +353,127 @@
                         dataString = dataString.substring(1);
                         dataString = dataString.substring(0, dataString.length - 1);
 
-                        var obj = JSON.parse(dataString);
-                        var powerGenVal = obj.Body.PAC.Values["1"];
-                        var integer = parseInt(powerGenVal, 10);
+                        if(dataString !== 'NoData'){
+                            var obj = JSON.parse(dataString);
+                            var powerGenVal = obj.Body.PAC.Values["1"];
+                            var integer = parseInt(powerGenVal, 10);
 
-                        if(integer == 0 && new Date().getHours() >= 18){
-                            $('#afterhours').show();
-                            $('#busyHours').hide();
-                        }else{
-                            $('#afterhours').hide();
-                            $('#busyHours').show();
-                        }
-                        
-                        if (integer > 1000) {
-                            $("#powerGen").text((integer / 1000) + ' kW');
-
-                            if (integer > 1600) {
-                                $('#wasmasjien').show();
-                            } else {
-                                $('#wasmasjien').hide();
-                            }
-                            if (integer > 2200) {
-                                $('#skottelgoed').show();
-                                $('#oond').show();
-                            } else {
-                                $('#skottelgoed').hide();
-                                $('#oond').hide();
-                            }
-                            if (integer > 4000) {
-                                $('#aircon').show();
-                                $('#aircon').text("Aircon HIGH");
-                                airconThresholdBreachCounter = 0;
-                            } else if (integer > 3000) {
-                                $('#aircon').show();
-                                $('#aircon').text("Aircon MEDIUM");
-                                airconThresholdBreachCounter = 0;
-                            } else if (integer > 2100) {
-                                $('#aircon').show();
-                                $('#aircon').text("Aircon LOW");
-                                airconThresholdBreachCounter = 0;
-                            } else if (integer > 1500) {
-                                checkAndSendAirconThresholdNotification(integer);
-                                airconThresholdBreachCounter ++;
-                                $('#aircon').show();
-                                $('#aircon').text("Aircon FAN ONLY");
-                            } else {
-                                $('#aircon').hide();
-                            }
-
-                        } else {
-                            checkAndSendAirconThresholdNotification(integer);
-                            $("#powerGen").text(integer + ' w');
-                            if(integer == 0){
-                                
-                                if(new Date().getHours() >= 21){
-                                    $('#body').hide();
-                                    $('html').on('click', function(){$('#body').show();});
-                                }
-
-                                timeout = 600000; // 10 mins;
+                            if(integer == 0 && new Date().getHours() >= 18){
+                                $('#afterhours').show();
+                                $('#busyHours').hide();
                             }else{
-                                $('#body').show();
-                                $('html').on('click', function(){});
                                 $('#afterhours').hide();
                                 $('#busyHours').show();
-                                timeout = 6000; // 6 seconds
                             }
-                        }
+                            
+                            if (integer > 1000) {
+                                $("#powerGen").text((integer / 1000) + ' kW');
 
-                        var gaugeVal = ((integer / 1000)/5*100).toFixed(2);
-                        gauge.refresh(gaugeVal);
-                        setGauge(gaugeVal);
-                        
-                        if(gaugeVal>0){
-                            $('#percentage').text(gaugeVal+"%");
-                        }else{
-                            $('#percentage').text("0%");
-                        }
-                    
-                        var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
-                        setProgress(kWhTotalGenerated, true);
-                        ////$("#powerTotal").text((kWhTotalGenerated) + " kWh");
-                        $("#dayEnd_TotalGenerated").text($('#powerTotal').text());
-                        $('#dayEnd_MonthExpected').text(monthExpected + ' kWh');
-
-                        if(kWhTotalGenerated <= monthExpected){
-                            $("#dayEnd_TotalGenerated").attr('style', 'color:red');
-                        }else{
-                            $("#dayEnd_TotalGenerated").attr('style', 'color:green');
-                        }
-                        
-                        //var powerTotalText = $("#powerTotal").text();
-                        
-                        var recordGenerated = getRecordPowerGeneratedForNow(integer);
-                        if(recordGenerated){
-                            recordGenerated = recordGenerated.replace('kWh','');
-                            var now = new Date();
-                            //don't trigger before 4pm.
-                            if(now.getHours() >= 16 && kWhTotalGenerated > recordGenerated){
-                                if(!newHighAlertSent){
-                                    newHighAlertSent = true;
-                                    sendNotification("Fronius", "New highest daily record!");
+                                if (integer > 1600) {
+                                    $('#wasmasjien').show();
+                                } else {
+                                    $('#wasmasjien').hide();
                                 }
-                                $("#powerTotalFromRecord").html('<span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
-                            }else{
-                                $("#powerTotalFromRecord").html('<span class="noRecord">(' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
+                                if (integer > 2200) {
+                                    $('#skottelgoed').show();
+                                    $('#oond').show();
+                                } else {
+                                    $('#skottelgoed').hide();
+                                    $('#oond').hide();
+                                }
+                                if (integer > 4000) {
+                                    $('#aircon').show();
+                                    $('#aircon').text("Aircon HIGH");
+                                    airconThresholdBreachCounter = 0;
+                                } else if (integer > 3000) {
+                                    $('#aircon').show();
+                                    $('#aircon').text("Aircon MEDIUM");
+                                    airconThresholdBreachCounter = 0;
+                                } else if (integer > 2100) {
+                                    $('#aircon').show();
+                                    $('#aircon').text("Aircon LOW");
+                                    airconThresholdBreachCounter = 0;
+                                } else if (integer > 1500) {
+                                    checkAndSendAirconThresholdNotification(integer);
+                                    airconThresholdBreachCounter ++;
+                                    $('#aircon').show();
+                                    $('#aircon').text("Aircon FAN ONLY");
+                                } else {
+                                    $('#aircon').hide();
+                                }
+
+                            } else {
+                                checkAndSendAirconThresholdNotification(integer);
+                                $("#powerGen").text(integer + ' w');
+                                if(integer == 0){
+                                    
+                                    if(new Date().getHours() >= 21){
+                                        $('#body').hide();
+                                        $('html').on('click', function(){$('#body').show();});
+                                    }
+
+                                    timeout = 600000; // 10 mins;
+                                }else{
+                                    $('#body').show();
+                                    $('html').on('click', function(){});
+                                    $('#afterhours').hide();
+                                    $('#busyHours').show();
+                                    timeout = 6000; // 6 seconds
+                                }
                             }
-                        }
+
+                            var gaugeVal = ((integer / 1000)/5*100).toFixed(2);
+                            gauge.refresh(gaugeVal);
+                            setGauge(gaugeVal);
+                            
+                            if(gaugeVal>0){
+                                $('#percentage').text(gaugeVal+"%");
+                            }else{
+                                $('#percentage').text("0%");
+                            }
                         
+                            var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
+                            setProgress(kWhTotalGenerated, true);
+                            ////$("#powerTotal").text((kWhTotalGenerated) + " kWh");
+                            $("#dayEnd_TotalGenerated").text($('#powerTotal').text());
+                            $('#dayEnd_MonthExpected').text(monthExpected + ' kWh');
+
+                            if(kWhTotalGenerated <= monthExpected){
+                                $("#dayEnd_TotalGenerated").attr('style', 'color:red');
+                            }else{
+                                $("#dayEnd_TotalGenerated").attr('style', 'color:green');
+                            }
+                            
+                            //var powerTotalText = $("#powerTotal").text();
+                            
+                            var recordGenerated = getRecordPowerGeneratedForNow(integer);
+                            if(recordGenerated){
+                                recordGenerated = recordGenerated.replace('kWh','');
+                                var now = new Date();
+                                //don't trigger before 4pm.
+                                if(now.getHours() >= 16 && kWhTotalGenerated > recordGenerated){
+                                    if(!newHighAlertSent){
+                                        newHighAlertSent = true;
+                                        sendNotification("Fronius", "New highest daily record!");
+                                    }
+                                    $("#powerTotalFromRecord").html('<span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
+                                }else{
+                                    $("#powerTotalFromRecord").html('<span class="noRecord">(' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
+                                }
+                            }
+                        }else{
+                            //api server data got cleared. Temp error state
+                            $('#afterhours').show();
+                            $('#busyHours').hide();
+                            $("#dayEnd_TotalGenerated").text("Error loading data from Server...");
+                            $('#dayEnd_MonthExpected').text('');
+                            if(new Date().getHours() >= 21){
+                                $('#body').hide();
+                                $('html').on('click', function(){$('#body').show();});
+                            }
+
+                            timeout = 600000; // 10 mins;
+                        }
 
                         setTimeout(function () { load(); }, timeout);
                     });
