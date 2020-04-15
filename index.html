@@ -194,7 +194,7 @@
         airconMonthEstimates[0] = 40.9;
         airconMonthEstimates[1] = 37.4;
         airconMonthEstimates[2] = 32.6;
-        airconMonthEstimates[3] = 29 //27;
+        airconMonthEstimates[3] = 29;
         airconMonthEstimates[4] = 20.3;
         airconMonthEstimates[5] = 18.4;
         airconMonthEstimates[6] = 19.7;
@@ -327,6 +327,9 @@
 
                     if(new Date().getHours()  === 0){
                         oldkWhMax = 0;
+                        medsReminderSent = false;
+                        medsAlertSent = false;
+                        notificationCounter = 0;
                     }
 
                     if(new Date().getHours()  === 10 && !medsReminderSent){
