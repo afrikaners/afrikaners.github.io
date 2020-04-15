@@ -146,7 +146,7 @@
                 </div>
                 <div class="row" style="display:inline">
                     <div class="col-xs-12 hidden-xs">
-                        <div style="width: 450px;margin-top:30px;"><iframe id="weatherWidget" style="display: block;" src="" width="450" height="520" frameborder="0"  scrolling="no"></iframe><a style="text-indent: -9999em;position: relative;z-index: 1;display: block;margin: -20px 0 0 0;height: 20px" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Weather info for Yanchep</a></div>
+                        <div style="width: 450px;"><iframe style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=57209" width="450" height="520" frameborder="0"  scrolling="no"></iframe><a style="margin: -20px 0 0 0;position: relative;text-indent: -9999em;z-index: 1;height: 20px;display: block" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Yanchep Forecast</a></div>
                     </div>
                 </div>
     
@@ -324,7 +324,11 @@
 
             function load() {
                 try{
-                    
+
+                    if(new Date().getHours()  === 0){
+                        oldkWhMax = 0;
+                    }
+
                     if(new Date().getHours()  === 10 && !medsReminderSent){
                         $.get("https://valuehold2.apphb.com/api/meds", function (data) {
                             if(data === false){
@@ -486,13 +490,13 @@
 
         var monthExpected;
         var newkWhMax;
-        var oldkWhMax = 0; //12
+        var oldkWhMax = 0; 
         var progressTimeout;
         var progressIncrements;
         var progressCounter = 0;
         var numberOfUpdates = 14;
         var progressTimeoutInterval = 0;
-                            //13
+                           
         function setProgress(kWh, resetProgressTimeout){
             
             if(oldkWhMax === 0){
