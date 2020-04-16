@@ -110,9 +110,9 @@
                         <h3 id="powerTotal"></h3>
                         <h3 id="powerTotalFromRecord"></h3>
                         <div class="progress">
-                            <div id="progressStandard" class="progress-bar progress-bar-success" style="width: 99%">
+                            <div id="progressStandard" class="progress-bar progress-bar-success progress-bar-striped active" style="width: 1%">
                             </div>
-                            <div id="progressBeyond" style="display:none" class="progress-bar progress-bar-danger" style="width: 1%">
+                            <div id="progressBeyond" style="display:none" class="progress-bar progress-bar-danger progress-bar-striped active" style="width: 1%">
                             </div>
                           </div>
                     </div>
@@ -506,6 +506,13 @@
                 oldkWhMax = kWh - 0.001;
             }
 
+            if(kWh == 0){
+                $('#progressStandard').removeClass("progress-bar-striped"); 
+                $('#progressStandard').removeClass("active"); 
+                $('#overGenerated').removeClass("progress-bar-striped"); 
+                $('#overGenerated').removeClass("active"); 
+            }
+
             if(resetProgressTimeout){
                 if(progressTimeout)
                     clearTimeout(progressTimeout);
@@ -536,6 +543,16 @@
                     percentage = (kWh/monthExpected*100);
                 $('#progressStandard').attr('style', 'width: ' + percentage + '%');
                 $('#overGenerated').hide();
+
+                if(kWh > 0){
+                    if (!$('#progressStandard').hasClass('progress-bar-striped')){
+                        $('#progressStandard').addClass("progress-bar-striped"); 
+                    }
+                    if (!$('#progressStandard').hasClass('active')){
+                        $('#progressStandard').addClass("active"); 
+                    }
+                }
+
             }else{
                 $('#progressBeyond').show();
                 var percentage = (kWh/(kWh-monthExpected+kWh)*100);
@@ -543,6 +560,17 @@
                 $('#progressBeyond').attr('style', 'width: ' + (100-percentage) + '%');
                 $('#overGenerated').text((kWh-monthExpected).toFixed(1));
                 $('#overGenerated').show();
+
+                $('#progressStandard').removeClass("progress-bar-striped"); 
+                $('#progressStandard').removeClass("active"); 
+
+                if (!$('#overGenerated').hasClass('progress-bar-striped')){
+                    $('#overGenerated').addClass("progress-bar-striped"); 
+                }
+                if (!$('#overGenerated').hasClass('active')){
+                    $('#overGenerated').addClass("active"); 
+                }
+
             }
 
             $("#powerTotal").text((kWh.toFixed(4)) + " kWh");
