@@ -413,8 +413,8 @@
                                 checkAndSendAirconThresholdNotification(integer);
                                 $("#powerGen").text(integer + ' w');
                                 if(integer == 0){
-                                    
-                                    if(new Date().getHours() >= 21){
+                                    console.log(new Date().getHours());
+                                    if(new Date().getHours() >= 20 || new Date().getHours() < 7){
                                         $('#body').hide();
                                         $('html').on('click', function(){$('#body').show();});
                                     }
