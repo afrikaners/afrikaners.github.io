@@ -365,7 +365,7 @@
                             var powerGenVal = obj.Body.PAC.Values["1"];
                             var integer = parseInt(powerGenVal, 10);
 
-                            if(integer == 0 && new Date().getHours() >= 18){
+                            if(integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
                                 $('#afterhours').show();
                                 $('#busyHours').hide();
                             }else{
@@ -502,9 +502,6 @@
                            
         function setProgress(kWh, resetProgressTimeout){
             
-            if(oldkWhMax === 0){
-                oldkWhMax = kWh - 0.001;
-            }
 
             if(kWh == 0){
                 $('#progressStandard').removeClass("progress-bar-striped"); 
