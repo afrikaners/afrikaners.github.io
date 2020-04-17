@@ -188,7 +188,12 @@
         var timeout = 6000;
 
         var medsReminderSent = false;
-        var medsAlertSent = false;
+        var allMedsAlertsSent = false;
+        var medsAlertSent8pm = false;
+        var medsAlertSent9pm = false;
+        var medsAlertSent10pm = false;
+
+        var medsTaken = false;
 
         var airconMonthEstimates = new Array();
         airconMonthEstimates[0] = 40.9;
@@ -322,33 +327,87 @@
                 });
             }
 
+            function resetFlags(){
+                oldkWhMax = 0;
+                medsReminderSent = false;
+                allMedsAlertsSent = false;
+                medsAlertSent8pm = false;
+                medsAlertSent9pm = false;
+                medsAlertSent10pm = false;
+                medsTaken = false;
+                notificationCounter = 0;
+            }
+
+            function checkAlerts(){
+                var nowHour = new Date().getHours();
+
+                if(nowHour  === 0)
+                    resetFlags();
+
+                //10am reminder if meds not taken yet.
+                if(nowHour  === 10)
+                    checkAndSendAmMedsReminder();
+                
+
+                //8pm, 9pm & 10pm reminder if meds still not taken.
+                if(nowHour === 20 || nowHour  === 21 || nowHour  === 22)
+                    checkAndSendPmMedsAlert(nowHour);
+
+            }
+
+            function checkAndSendAmMedsReminder(){
+                if(medsTaken || medsReminderSent)
+                    return;
+
+                $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                    if(data === false){
+                        medsReminderSent = true;
+                        sendNotification('Meds', "Boet, onthou jou medisyne!");
+                    }else{
+                        medsTaken = true;
+                    }
+                });
+            }
+
+            function checkAndSendPmMedsAlert(nowHour){
+                if(medsTaken || allMedsAlertsSent)
+                    return;
+
+                if(nowHour === 20 && medsAlertSent8pm){
+                    return;
+                } else if(nowHour === 21 && medsAlertSent9pm){
+                    return;
+                } else if(nowHour === 22 && medsAlertSent10pm){
+                    return;
+                }else{
+                    console.log('not between 8pm - 11pm for PM alert...');
+                    return;
+                }
+
+                $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                    if(data === false){
+
+                        sendNotification('Meds', "Boet, Drink jou medisyne!");
+                        
+                        if(nowHour === 20)
+                            medsAlertSent8pm = true;
+                        if(nowHour === 21)
+                            medsAlertSent9pm = true;
+                        if(nowHour === 22)
+                            medsAlertSent10pm = true;
+
+                        allMedsAlertsSent = medsAlertSent8pm && medsAlertSent9pm && medsAlertSent10pm;
+                    }else{
+                        medsTaken = true;
+                    }
+                });
+
+            }
+
             function load() {
                 try{
 
-                    if(new Date().getHours()  === 0){
-                        oldkWhMax = 0;
-                        medsReminderSent = false;
-                        medsAlertSent = false;
-                        notificationCounter = 0;
-                    }
-
-                    if(new Date().getHours()  === 10 && !medsReminderSent){
-                        $.get("https://valuehold2.apphb.com/api/meds", function (data) {
-                            if(data === false){
-                                sendNotification('Meds', "Boet, onthou jou medisyne!");
-                                medsReminderSent = true;
-                            }
-                        });
-                    }
-
-                    if((new Date().getHours()  === 20 || new Date().getHours()  === 21 || new Date().getHours()  === 22)  && !medsAlertSent){
-                        $.get("https://valuehold2.apphb.com/api/meds", function (data) {
-                            if(data === false){
-                                sendNotification('Meds', "Boet, Drink jou medisyne!");
-                                medsAlertSent = new Date().getHours()  === 22;
-                            }
-                        });
-                    }
+                    checkAlerts();
                    
                     $.get("https://valuehold2.apphb.com/api/values", function (data) {
                         // alert( "Data Loaded: " +  );
