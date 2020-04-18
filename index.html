@@ -40,6 +40,11 @@
             font-size: smaller;
             color:red;
         }
+        #dayEnd_Error{
+            color:red;
+            font-size: bigger;
+            font-weight: 800;
+        }
 
         .progress-bar-danger{
             background-color:lime !important;
@@ -135,6 +140,7 @@
                         <h3 id="dayEnd_TotalGenerated"></h3>
                         <h2>Expected daily for this Month</h2>
                         <h3 id="dayEnd_MonthExpected"></h3>
+                        <h3 id="dayEnd_Error" style="display:none;"></h3>
                     </div>
                 </div>
             </div>
@@ -192,6 +198,7 @@
         var medsAlertSent8pm = false;
         var medsAlertSent9pm = false;
         var medsAlertSent10pm = false;
+        var firstLoad = true;
 
         var medsTaken = false;
 
@@ -292,7 +299,6 @@
             }catch(ex){
                 alert(ex.message);
             }
-           
 
             function loadWeather(){
                 try{
@@ -427,6 +433,7 @@
                             if(integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
                                 $('#afterhours').show();
                                 $('#busyHours').hide();
+                                $('#dayEnd_Error').hide();
                             }else{
                                 $('#afterhours').hide();
                                 $('#busyHours').show();
@@ -530,6 +537,7 @@
                         }else{
                             //api server data got cleared. Temp error state
                             $('#afterhours').show();
+                            $('#dayEnd_Error').hide();
                             $('#busyHours').hide();
                             $("#dayEnd_TotalGenerated").text("Error loading data from Server...");
                             $('#dayEnd_MonthExpected').text('');
@@ -540,14 +548,23 @@
 
                             timeout = 600000; // 10 mins;
                         }
-
+                        firstLoad = false; 
                         setTimeout(function () { load(); }, timeout);
+                    })
+                    .fail(function() {
+                        console.log('fail');
+                        $('#afterhours').show();
+                        $('#busyHours').hide();
+                        $('#dayEnd_Error').show();
+                        $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
+                        setTimeout(function () { load(); loadWeather();}, timeout);
                     });
                 }catch(ex){
+                    console.log('exception');
                     setTimeout(function () { load(); }, timeout);
                 }
             }
-
+           
         });
 
         var monthExpected;
@@ -567,6 +584,10 @@
                 $('#progressStandard').removeClass("active"); 
                 $('#overGenerated').removeClass("progress-bar-striped"); 
                 $('#overGenerated').removeClass("active"); 
+            }
+
+            if(firstLoad){  
+                oldkWhMax = kWh;
             }
 
             if(resetProgressTimeout){
@@ -694,8 +715,6 @@
             //return recordData.find(x => x[1] === key) !== undefined ? recordData.find(x => x[1] === key)[2] : null;
         }
         
-        
-
         function formatAMPM(date) {
             var hours = date.getHours();
             var minutes = date.getMinutes();
