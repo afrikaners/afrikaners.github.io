@@ -379,14 +379,14 @@
                 if(medsTaken || allMedsAlertsSent)
                     return;
 
+                if(!(nowHour === 20 || nowHour === 21 || nowHour === 22 ))
+                    return;
+
                 if(nowHour === 20 && medsAlertSent8pm){
                     return;
                 } else if(nowHour === 21 && medsAlertSent9pm){
                     return;
                 } else if(nowHour === 22 && medsAlertSent10pm){
-                    return;
-                }else{
-                    console.log('not between 8pm - 11pm for PM alert...');
                     return;
                 }
 
