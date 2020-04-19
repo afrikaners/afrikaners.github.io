@@ -66,11 +66,17 @@
             color:black;
         }
 
-        #overGenerated{
+        #overGenerated, #estimateLiveCost{
             position:absolute;
             color:black;
             right:20px;
             top:61px;
+        }
+
+        #estimateLiveCost{
+            color:white;
+            top:63px;
+            
         }
     </style>
 </head>
@@ -111,9 +117,10 @@
                         
                        
                         <h3>Total for today:</h3>
-                        <p id="overGenerated" style="display:none">0</p>
+                        <p id="overGenerated" style="display:none"></p>
                         <h3 id="powerTotal"></h3>
                         <h3 id="powerTotalFromRecord"></h3>
+                        <h3 id="estimateLiveCost"></h3>
                         <div class="progress">
                             <div id="progressStandard" class="progress-bar progress-bar-success progress-bar-striped active" style="width: 1%">
                             </div>
@@ -146,7 +153,7 @@
                 <div id="stats" class="row">
                     <div class="col-xs-12">
                         <h2>Stats</h2>
-<h3>Feed In pay:</h3>
+                        <h3>Estimate daily loss / profit:</h3>
                         <h3 id="stats_feedin_price"></h3>
                     </div>
                 </div>
@@ -206,6 +213,11 @@
         var medsAlertSent9pm = false;
         var medsAlertSent10pm = false;
         var firstLoad = true;
+
+        var feedInKwhPay = 0.071;
+        var gridKwhPrice = 0.262026;
+        var avgDailyGridUse = 4.384615385;
+        var avgDailySolarUse = 3.168423684;
 
         var medsTaken = false;
 
@@ -307,8 +319,22 @@
                 alert(ex.message);
             }
 
+            function loadSolarBaseSettings(){
+                try{
+                    $.get("https://valuehold2.apphb.com/api/solardata", function (data) {
+                         avgDailyGridUse = data.avgDailyGridUse;
+                         avgDailySolarUse = data.avgDailSolarUse;
+                         feedInKwhPay = data.feedInKwhPay;
+                         gridKwhPrice = data.gridKwhFee;
+                    });
+                }catch(ex){
+                   console.log('error loading base settings...');
+                }
+            }
+
             function loadWeather(){
                 try{
+                    $('#weatherWidget').attr('src', '');
                     $('#weatherWidget').attr('src', "https://cdnres.willyweather.com.au/widget/loadView.html?id=57109");
                     setTimeout(function () { loadWeather(); }, 900000);
                 }catch(ex){
@@ -354,8 +380,12 @@
             function checkAlerts(){
                 var nowHour = new Date().getHours();
 
-                if(nowHour  === 0)
+                if(nowHour  === 0){
                     resetFlags();
+                    loadSolarBaseSettings();
+                }else if(firstLoad){
+                    loadSolarBaseSettings();
+                }
 
                 //10am reminder if meds not taken yet.
                 if(nowHour  === 10)
@@ -486,7 +516,6 @@
                                 checkAndSendAirconThresholdNotification(integer);
                                 $("#powerGen").text(integer + ' w');
                                 if(integer == 0){
-                                    console.log(new Date().getHours());
                                     if(new Date().getHours() >= 20 || new Date().getHours() < 7){
                                         $('#body').hide();
                                         $('html').on('click', function(){$('#body').show();});
@@ -513,12 +542,15 @@
                             }
                         
                             var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
+    
                             setProgress(kWhTotalGenerated, true);
                             ////$("#powerTotal").text((kWhTotalGenerated) + " kWh");
                             $("#dayEnd_TotalGenerated").text($('#powerTotal').text());
                             $('#dayEnd_MonthExpected').text(monthExpected + ' kWh');
-$('#stats').show();
-$('#stats_feedin_price').text('$'+(kWhTotalGenerated*0.071).toFixed(2));
+                            $('#stats').show();
+                            
+                            setEstimatePricingValues(kWhTotalGenerated);
+                            
 
                             if(kWhTotalGenerated <= monthExpected){
                                 $("#dayEnd_TotalGenerated").attr('style', 'color:red');
@@ -547,9 +579,11 @@ $('#stats_feedin_price').text('$'+(kWhTotalGenerated*0.071).toFixed(2));
                             //api server data got cleared. Temp error state
                             $('#afterhours').show();
                             $('#dayEnd_Error').hide();
+                            $('#stats').hide();
                             $('#busyHours').hide();
                             $("#dayEnd_TotalGenerated").text("Error loading data from Server...");
                             $('#dayEnd_MonthExpected').text('');
+
                             if(new Date().getHours() >= 21){
                                 $('#body').hide();
                                 $('html').on('click', function(){$('#body').show();});
@@ -565,7 +599,7 @@ $('#stats_feedin_price').text('$'+(kWhTotalGenerated*0.071).toFixed(2));
                         $('#afterhours').show();
                         $('#busyHours').hide();
                         $('#dayEnd_Error').show();
-$('#stats').hide();
+                        $('#stats').hide();
                         $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
                         setTimeout(function () { load(); loadWeather();}, timeout);
                     });
@@ -576,6 +610,22 @@ $('#stats').hide();
             }
            
         });
+
+        function setEstimatePricingValues(kWhTotalGenerated){
+            var price =(avgDailyGridUse*gridKwhPrice)-((kWhTotalGenerated-avgDailySolarUse)*feedInKwhPay);
+                        
+            if(price < 0){
+                $('#stats_feedin_price').text('-$'+(Math.abs(price)).toFixed(2));
+                $('#stats_feedin_price').css('color', 'green');
+                $('#estimateLiveCost').html('<span>(' + $('#stats_feedin_price').text() + ')</span>');
+                $('#estimateLiveCost').css('color', 'green');
+            }else{
+                $('#stats_feedin_price').text('$'+price.toFixed(2));
+                $('#stats_feedin_price').css('color', 'red');
+                $('#estimateLiveCost').text('(' + $('#stats_feedin_price').text() + ')');
+                $('#estimateLiveCost').css('color', 'red');
+            }
+        }
 
         var monthExpected;
         var newkWhMax;
