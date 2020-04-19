@@ -143,6 +143,13 @@
                         <h3 id="dayEnd_Error" style="display:none;"></h3>
                     </div>
                 </div>
+                <div id="stats" class="row">
+                    <div class="col-xs-12">
+                        <h2>Stats</h2>
+<h3>Feed In pay:</h3>
+                        <h3 id="stats_feedin_price"></h3>
+                    </div>
+                </div>
             </div>
             <div class="col-md-6 col-sm-6" style="padding-right:20px;">
                 <div class="row" id="airconStatus" style="display:none">
@@ -510,6 +517,8 @@
                             ////$("#powerTotal").text((kWhTotalGenerated) + " kWh");
                             $("#dayEnd_TotalGenerated").text($('#powerTotal').text());
                             $('#dayEnd_MonthExpected').text(monthExpected + ' kWh');
+$('#stats').show();
+$('#stats_feedin_price').text('$'+(kWhTotalGenerated*0.071).toFixed(2));
 
                             if(kWhTotalGenerated <= monthExpected){
                                 $("#dayEnd_TotalGenerated").attr('style', 'color:red');
@@ -556,6 +565,7 @@
                         $('#afterhours').show();
                         $('#busyHours').hide();
                         $('#dayEnd_Error').show();
+$('#stats').hide();
                         $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
                         setTimeout(function () { load(); loadWeather();}, timeout);
                     });
