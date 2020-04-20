@@ -617,12 +617,12 @@
             if(price < 0){
                 $('#stats_feedin_price').text('-$'+(Math.abs(price)).toFixed(2));
                 $('#stats_feedin_price').css('color', 'green');
-                $('#estimateLiveCost').html('<span>(' + price.toFixed(4) + ')</span>');
+                $('#estimateLiveCost').html('<span>(-$' + price.toFixed(4) + ')</span>');
                 $('#estimateLiveCost').css('color', 'green');
             }else{
                 $('#stats_feedin_price').text('$'+price.toFixed(2));
                 $('#stats_feedin_price').css('color', 'red');
-                $('#estimateLiveCost').text('(' + price.toFixed(4) + ')');
+                $('#estimateLiveCost').text('($' + price.toFixed(4) + ')');
                 $('#estimateLiveCost').css('color', 'red');
             }
         }
