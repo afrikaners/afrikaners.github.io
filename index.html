@@ -218,6 +218,8 @@
         var gridKwhPrice = 0.262026;
         var avgDailyGridUse = 4.384615385;
         var avgDailySolarUse = 3.168423684;
+        var todaySolarUseActual, todayGridUseActual, dateLastLogged, totalGridUseActual, totalFeedInActual, todayGeneratedActual, todayTotalUsedActual;
+
 
         var medsTaken = false;
 
@@ -326,6 +328,13 @@
                          avgDailySolarUse = data.avgDailSolarUse;
                          feedInKwhPay = data.feedInKwhPay;
                          gridKwhPrice = data.gridKwhFee;
+                         todaySolarUseActual = data.todaySolarUse; 
+                         todayGridUseActual = data.todayGridUse; 
+                         dateLastLogged = data.dateLastLogged;
+                         totalGridUseActual = data.totalGridUse; 
+                         totalFeedInActual = data.totalFeedIn;
+                         todayGeneratedActual = data.todayGenerated;
+                         todayTotalUsedActual = data.todayTotalUsed;
                     });
                 }catch(ex){
                    console.log('error loading base settings...');
