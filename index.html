@@ -166,7 +166,7 @@
                 </div>
                 <div class="row" style="display:inline">
                     <div class="col-xs-12 hidden-xs">
-                        <div style="width: 450px;"><iframe style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=57209" width="450" height="520" frameborder="0"  scrolling="no"></iframe><a style="margin: -20px 0 0 0;position: relative;text-indent: -9999em;z-index: 1;height: 20px;display: block" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Yanchep Forecast</a></div>
+                        <div style="width: 450px;"><iframe id="weatherWidget" style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=57209" width="450" height="520" frameborder="0"  scrolling="no"></iframe><a style="margin: -20px 0 0 0;position: relative;text-indent: -9999em;z-index: 1;height: 20px;display: block" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Yanchep Forecast</a></div>
                     </div>
                 </div>
     
@@ -344,10 +344,10 @@
             function loadWeather(){
                 try{
                     $('#weatherWidget').attr('src', '');
-                    $('#weatherWidget').attr('src', "https://cdnres.willyweather.com.au/widget/loadView.html?id=57109");
-                    setTimeout(function () { loadWeather(); }, 900000);
+                    setTimeout(function () {$('#weatherWidget').attr('src', "https://cdnres.willyweather.com.au/widget/loadView.html?id=57109")},1000);
+                    setTimeout(function () { loadWeather(); }, 720000);
                 }catch(ex){
-                    setTimeout(function () { loadWeather(); }, 900000);
+                    setTimeout(function () { loadWeather(); }, 720000);
                 }
             }
 
