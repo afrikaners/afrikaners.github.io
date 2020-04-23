@@ -150,9 +150,16 @@
                         <h3 id="dayEnd_Error" style="display:none;"></h3>
                     </div>
                 </div>
-                <div id="stats" class="row">
+                <div id="estimateStats" class="row">
                     <div class="col-xs-12">
-                        <h2>Stats</h2>
+                        <h2>Estimate Stats</h2>
+                        <h3>Estimate daily loss / profit:</h3>
+                        <h3 id="stats_feedin_price"></h3>
+                    </div>
+                </div>
+                <div id="actualStats" class="row" style="display:none;">
+                    <div class="col-xs-12">
+                        <h2>Estimate Stats</h2>
                         <h3>Estimate daily loss / profit:</h3>
                         <h3 id="stats_feedin_price"></h3>
                     </div>
@@ -175,6 +182,11 @@
         <div id="pvOutputSection" style="display:none;" class="row section">
             <div class="col-xs-12">
                 <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="4000" frameborder="0"  scrolling="no"></iframe>
+            </div>
+        </div>
+        <div id="savingsSection" style="display:none;" class="row section">
+            <div class="col-xs-12">
+               <img style="width:1024px" id="graphImage" src=""/>
             </div>
         </div>
         <div id="settingsSection" style="display:none;" class="row section">
@@ -839,6 +851,10 @@
             }else if(mode === 'settings'){
                 $('#settingsSection').show();
                 $('#settings').addClass('active');
+            }else if(mode === 'savings'){
+                $('#savings').addClass('active');
+                $('#savingsSection').show();
+                $('#graphImage').attr('src', 'https://valuehold2.apphb.com/api/graph?oid='+queryString["oid"]);
             }else{
                 $('#pvOutputIframe').hide();
                 $('#pvOutputSection').show();
@@ -855,14 +871,8 @@
                     $('#pvOutputDaily').addClass('active');
                     $('#pvOutputIframe').attr('src','https://pvoutput.org/list.jsp?id=84198&sid=74658');
                 }
-                else if(mode === 'savings'){
-                    $('#savings').addClass('active');
-                    
-                    $('#pvOutputIframe').attr('src', 'https://valuehold2.apphb.com/api/graph?oid='+queryString["oid"]);
-                }
 
-                $('#pvOutputIframe').show();
-                    
+                $('#pvOutputIframe').show();  
             }
         }
     </script>
