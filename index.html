@@ -157,11 +157,86 @@
                         <h3 id="stats_feedin_price"></h3>
                     </div>
                 </div>
-                <div id="actualStats" class="row" style="display:none;">
+                <div id="actualStats" class="row" style="display:none">
                     <div class="col-xs-12">
-                        <h2>Estimate Stats</h2>
-                        <h3>Estimate daily loss / profit:</h3>
-                        <h3 id="stats_feedin_price"></h3>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h2>Actual Stats</h2>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h3>Total Saved / Loss Today</h2>
+                            </div>
+                            <div class="col-xs-6">
+                                <h3 id="totalSavedToday"></h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                              &nbsp;
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h4>Synergy Bill impact of Today</h4>
+                            </div>
+                            <div class="col-xs-6">
+                                <h4 id="synergyImpact"></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h4>Units Fed In Today</h4>
+                            </div>
+                            <div class="col-xs-6">
+                                <h4 id="unitsFedInToday"></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h4>Feed In Pay Today</h4>
+                            </div>
+                            <div class="col-xs-6">
+                                <h4 id="feedInPayToday"></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h4>Grid Units Used Today</h4>
+                            </div>
+                            <div class="col-xs-6">
+                                <h4 id="gridUnitsUsedToday"></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h4>Grid Used Cost Today</h4>
+                            </div>
+                            <div class="col-xs-6">
+                                <h4 id="gridUsedCost"></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h4>Solar Units Used Today</h4>
+                            </div>
+                            <div class="col-xs-6">
+                                <h4 id="solarUnitsUsedToday"></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h4>Solar Used Savings</h4>
+                            </div>
+                            <div class="col-xs-6">
+                                <h4 id="solarUsedSavings"></h4>
+                            </div>
+                        </div>
+                       
+                        
+                        
+                       
                     </div>
                 </div>
             </div>
@@ -333,8 +408,9 @@
                 alert(ex.message);
             }
 
-            function loadSolarBaseSettings(){
+            function loadSolarBaseSettings(checkAndUpdateUi){
                 try{
+
                     $.get("https://valuehold2.apphb.com/api/solardata", function (data) {
                          avgDailyGridUse = data.avgDailyGridUse;
                          avgDailySolarUse = data.avgDailSolarUse;
@@ -347,6 +423,55 @@
                          totalFeedInActual = data.totalFeedIn;
                          todayGeneratedActual = data.todayGenerated;
                          todayTotalUsedActual = data.todayTotalUsed;
+
+                         if(checkAndUpdateUi){
+                             var now = new Date();
+                             var month = now.getMonth()+1;
+                             var day = now.getDate();
+                             if(month < 10){
+                                 month = "0"+month;
+                             }
+                             if(day < 10){
+                                 day = "0"+day;
+                             }
+                             var today =  day + "/" + month + "/" + now.getFullYear();
+                             if(today === dateLastLogged){
+                                $('#estimateStats').hide();
+                                $('#actualStats').show();
+                                
+                                var feedInPay = (todayGeneratedActual-todaySolarUseActual)*feedInKwhPay;
+                                var gridUsedFee = todayGridUseActual*gridKwhPrice;
+                                var solarUsedSavings = todaySolarUseActual*gridKwhPrice;
+                                var totalSaved = feedInPay - gridUsedFee;
+                                var savingsIncludingSolarUse = totalSaved + solarUsedSavings;
+
+                                $('#totalSavedToday').text("$ " + savingsIncludingSolarUse.toFixed(2));
+                                if(savingsIncludingSolarUse > 0){
+                                    $('#totalSavedToday').attr("style", "color:lightgreen");
+                                }else{
+                                    $('#totalSavedToday').attr("style", "color:red");
+                                }
+                                
+                                $('#synergyImpact').text("$ " + totalSaved.toFixed(4));
+                                if(totalSaved > 0){
+                                    $('#synergyImpact').attr("style", "color:lightgreen");
+                                }else{
+                                    $('#synergyImpact').attr("style", "color:red");
+                                }
+                                $('#feedInPayToday').text("$ " + feedInPay.toFixed(2));
+                                $('#gridUsedCost').text("$ " + gridUsedFee);
+                                $('#gridUsedCost').attr("style", "color:red");
+                                $('#unitsFedInToday').text(todayGeneratedActual-todaySolarUseActual.toFixed(2) + "kWh");
+                                $('#solarUnitsUsedToday').text(todaySolarUseActual + " kWh");
+                                $('#gridUnitsUsedToday').text(todayGridUseActual + " kWh");
+                                $('#solarUsedSavings').text("$ " + solarUsedSavings.toFixed(2));
+                                $('#solarUsedSavings').attr("style", "color:lightgreen");
+
+                             }
+                         }else{
+                            $('#estimateStats').show();
+                            $('#actualStats').hide();
+                         }
                     });
                 }catch(ex){
                    console.log('error loading base settings...');
@@ -492,6 +617,7 @@
                                 $('#afterhours').show();
                                 $('#busyHours').hide();
                                 $('#dayEnd_Error').hide();
+                                loadSolarBaseSettings(true);
                             }else{
                                 $('#afterhours').hide();
                                 $('#busyHours').show();
