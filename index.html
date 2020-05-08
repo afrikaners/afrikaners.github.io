@@ -644,7 +644,7 @@
                             feedingIntoGrid = currentRealtimeConsumption < 0;
                         
                             
-                            if(currentRealtimeGridFeedIn < 0){
+                            if(currentRealtimeConsumption < 0){
                                 if(currentRealtimeConsumption > -1000){
                                     $('#currentConsumption').text(Math.abs((currentRealtimeConsumption/1000)).toFixed(2) + " kW");
                                 }else{
