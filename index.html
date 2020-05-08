@@ -628,7 +628,7 @@
 
                     checkAlerts();
 
-                    $.get("http://valuehold2.apphb.com/api/solarflowdata",function(data){
+                    $.get("https://valuehold2.apphb.com/api/solarflowdata",function(data){
                             var dataString = JSON.stringify(data);
                             //console.log(dataString);
                             dataString = dataString.replace(/\\n/g, "");
@@ -702,9 +702,6 @@
                             $('#afterhours').hide();
                             $('#busyHours').show();
                         }
-                        
-                        console.log('aaa');
-                        console.log(currentRealtimeGridFeedIn);
 
                         if (currentRealtimeGridFeedIn > 1000) {
                             $("#powerGen").text((integer / 1000) + ' kW');
