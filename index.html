@@ -649,7 +649,7 @@
                             currentRealtimeConsumption = obj.Body.Site.P_Load;
                             currentRealtimeGridFeedIn = obj.Body.Site.P_Grid;
 
-                            feedingIntoGrid = currentRealtimeConsumption < 0;
+                            feedingIntoGrid = currentRealtimeGridFeedIn < 0;
                         
                             
                             if(currentRealtimeConsumption < 0){
