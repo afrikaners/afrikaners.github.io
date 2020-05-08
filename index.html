@@ -165,6 +165,23 @@
                           </div>
                     </div>
                 </div>
+                <div class="row" id="solarMeterData" style="display:none;">
+                    <div class="col-xs-2">
+                       <h5>Fed In</h5>
+                    </div>
+                    <div class="col-xs-3">  
+                        <h5 id="actualUnitsFedIn"></h5>
+                    </div>
+                    <div class="col-xs-2">
+                        <h5>&nbsp;</h5>
+                    </div>
+                    <div class="col-xs-2">
+                        <h5>Consumed</h5>
+                    </div>
+                    <div class="col-xs-3">
+                       <h5 id="totalConsumed"></h5>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-xs-12">
                         <h1 id="skottelgoed" style="display:none" class="green">Skottelgoed Wasser</h1>
@@ -632,6 +649,7 @@
             }
 
             function load() {
+                
                 try{
 
                     checkAlerts();
@@ -744,7 +762,7 @@
                             } else {
                                 $('#wasmasjien').hide();
                             }
-                            if (remainingKw > 2200) {
+                            if (remainingKw > 2900) {
                                 $('#skottelgoed').show();
                                 $('#oond').show();
                             } else {
@@ -819,7 +837,7 @@
                         }
                         
                         //var powerTotalText = $("#powerTotal").text();
-                        
+                        loadMeterData(kWhTotalGenerated);
                         var recordGenerated = getRecordPowerGeneratedForNow(integer);
                         if(recordGenerated){
                             recordGenerated = recordGenerated.replace('kWh','');
@@ -852,10 +870,41 @@
                         timeout = 600000; // 10 mins;
                     }
                     firstLoad = false; 
+                    
                     setTimeout(function () { load(); }, timeout);
                 })
                 .fail(failedLoading);
 
+            }
+        
+            function loadMeterData(kWhTotalGenerated){
+                $.get("https://valuehold2.apphb.com/api/solarmeterdata",function(data){
+                    $("#solarMeterData").show();
+                            var dataString = JSON.stringify(data);
+                            //console.log(dataString);
+                            dataString = dataString.replace(/\\n/g, "");
+                            dataString = dataString.replace(/\\/g, "");
+                            dataString = dataString.replace(/ /g, '');
+                            dataString = dataString.substring(1);
+                            dataString = dataString.substring(0, dataString.length - 1);
+
+                            var obj = JSON.parse(dataString);
+                           
+                            var unitsFedIn = obj.Body[0].EnergyReal_WAC_Sum_Produced;
+
+                            if(unitsFedIn > 1000){
+                                $('#actualUnitsFedIn').text((unitsFedIn/1000).toFixed(2) + " kWh");
+                            }
+
+
+                            
+                            var unitsConsumed = kWhTotalGenerated - (unitsFedIn/1000);
+                            $("#totalConsumed").text(unitsConsumed.toFixed(2) + " kWh");
+                           
+
+                }).fail(function(){
+                    $("#solarMeterData").hide();
+                });
             }
         });
 
