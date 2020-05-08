@@ -130,12 +130,20 @@
                                 <h5 id="currentConsumption"></h5>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" id="feedIn" style="display:none">
                             <div class="col-xs-6">
-                                <h6>Feed In</h6>
+                                <h6 >Feed In</h6>
                             </div>
                             <div class="col-xs-6">
-                                <h5 id="currentFeedIn"></h5>
+                                <h5 style="color:green;" id="currentFeedIn"></h5>
+                            </div>
+                        </div>
+                        <div class="row" id="pullingFromGrid" style="display:none">
+                            <div class="col-xs-6">
+                                <h6 >Grid Use</h6>
+                            </div>
+                            <div  class="col-xs-6">
+                                <h5 style="color:red" id="currentPullFromGrid"></h5>
                             </div>
                         </div>
                     </div>
@@ -654,7 +662,9 @@
                                 $('#currentConsumption').text("0 W");
                             }
 
-                            if(currentRealtimeGridFeedIn < 0){
+                            if(feedingIntoGrid){
+                                $("#feedIn").show();
+                                $("#pullingFromGrid").hide();
                                 currentRealtimeGridFeedIn = Math.abs(currentRealtimeGridFeedIn);
                                 if(currentRealtimeGridFeedIn > 1000){
                                     $('#currentFeedIn').text((currentRealtimeGridFeedIn/1000).toFixed(2) + " kW");
@@ -663,6 +673,15 @@
                                 }
                             }else{
                                 $('#currentFeedIn').text("0 W");
+                                $("#feedIn").hide();
+                                $("#pullingFromGrid").show();
+
+                                if(currentRealtimeGridFeedIn > 1000){
+                                    $('#currentPullFromGrid').text((currentRealtimeGridFeedIn/1000).toFixed(2) + " kW");
+                                }else{
+                                    $('#currentPullFromGrid').text(currentRealtimeGridFeedIn.toFixed(2) + " W");
+                                }
+
                             }
                             
                             
@@ -712,35 +731,40 @@
                             $('#busyHours').show();
                         }
 
-                        if (currentRealtimeGridFeedIn > 1000) {
+                        var remainingKw = 0;
+                        if(feedingIntoGrid){
+                            remainingKw = currentRealtimeGridFeedIn;
+                        }
+
+                        if (remainingKw > 1000) {
                             $("#powerGen").text((integer / 1000) + ' kW');
 
-                            if (currentRealtimeGridFeedIn > 1600) {
+                            if (remainingKw > 1600) {
                                 $('#wasmasjien').show();
                             } else {
                                 $('#wasmasjien').hide();
                             }
-                            if (currentRealtimeGridFeedIn > 2200) {
+                            if (remainingKw > 2200) {
                                 $('#skottelgoed').show();
                                 $('#oond').show();
                             } else {
                                 $('#skottelgoed').hide();
                                 $('#oond').hide();
                             }
-                            if (currentRealtimeGridFeedIn > 4000) {
+                            if (remainingKw > 4000) {
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon HIGH");
                                 airconThresholdBreachCounter = 0;
-                            } else if (currentRealtimeGridFeedIn > 3000) {
+                            } else if (remainingKw > 3000) {
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon MEDIUM");
                                 airconThresholdBreachCounter = 0;
-                            } else if (currentRealtimeGridFeedIn > 2100) {
+                            } else if (remainingKw > 2100) {
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon LOW");
                                 airconThresholdBreachCounter = 0;
                             } else if (currentRealtimeGridFeedIn > 1500) {
-                                checkAndSendAirconThresholdNotification(currentRealtimeGridFeedIn);
+                                checkAndSendAirconThresholdNotification(remainingKw);
                                 airconThresholdBreachCounter ++;
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon FAN ONLY");
