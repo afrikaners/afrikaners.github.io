@@ -78,6 +78,14 @@
             top:63px;
             
         }
+
+        .setting-buttons input{
+            background-color: black;
+            height: 50px;
+            color: white;
+            width: 220px;
+            margin-left: 25px;
+        }
     </style>
 </head>
 
@@ -221,7 +229,7 @@
                         </div>
                         <div class="row">
                             <div class="col-xs-6">
-                                <h4>Synergy Bill impact of Today</h4>
+                                <h4>Syn Bill impact of Today</h4>
                             </div>
                             <div class="col-xs-6">
                                 <h4 id="synergyImpact"></h4>
@@ -324,12 +332,13 @@
             </div>
         </div>
         <div id="settingsSection" style="display:none;" class="row section">
-            <div class="col-xs-12">
+            <div class="col-xs-12 setting-buttons">
                 <div class="row">
-                    <div class="col-xs-12">
-                        <input type="button" id="toggle" value="Wake Lock is disabled" /><br/>
-                        <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" />
-                        <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" />
+                    <div class="col-xs-12 ">
+                        <input type="button" id="toggle" value="Wake Lock is disabled" /><br/><br/>
+                        <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" /><br/><br/>
+                        <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" /><br/><br/>
+                        <input type="button" id="soundMute" value="Sound Is Muted: false" /><br/><br/>
                         <div id="error"></div>
                     </div>
                 </div>
@@ -368,6 +377,9 @@
         var currentRealtimeConsumption;
         var currentRealtimeGridFeedIn;
         var feedingIntoGrid;
+        var alertSound = new Audio('alert.mp3');
+        var alertSoundTriggerSet = false;
+        var soundsMuted = false;
 
         var medsTaken = false;
 
@@ -425,6 +437,12 @@
                     else
                         $("#airconStatus").hide();
                 });
+
+                $('#soundMute').click(function(){
+                    soundsMuted = !soundsMuted;
+                    $('#soundMute').attr('value', 'Sound Is Muted: ' + soundsMuted);
+                });
+                
 
                 load();
                 loadWeather();
@@ -590,6 +608,7 @@
                     resetFlags();
                     //loadSolarBaseSettings();
                 }else if(firstLoad){
+                    alertSound.play();
                     //loadSolarBaseSettings();
                 }
 
@@ -681,6 +700,20 @@
                                 }else{
                                     $('#currentConsumption').text(Math.abs(currentRealtimeConsumption).toFixed(2) + " W");
                                 }
+
+                                var nowHour = new Date().getHours();
+                                if(nowHour > 10 && nowHour < 16){
+                                    if(!soundsMuted && feedingIntoGrid && currentRealtimeGridFeedIn > currentRealtimeConsumption){
+                                        if(alertSoundTriggerSet){
+                                            alertSound.play();
+                                            alertSoundTriggerSet = false;
+                                        }else{
+                                            alertSoundTriggerSet = true;
+                                        }
+                                    }
+                                }
+                                
+
                             }else{
                                 $('#currentConsumption').text("0 W");
                             }
@@ -908,16 +941,7 @@
 
                             var obj = JSON.parse(dataString);
                            
-                            var unitsFedIn = obj.Body[0].EnergyReal_WAC_Sum_Produced;
                             
-                            if(unitsFedIn > 1000){
-                                $('#actualUnitsFedIn').text((unitsFedIn/1000).toFixed(2) + " kWh");
-                               
-                            }else{
-                                $('#actualUnitsFedIn').text((unitsFedIn).toFixed(2) + " Wh");
-                            }
-
-                            $('#unitsFedInToday').text($('#actualUnitsFedIn').text());
 
 
                             var gridUnitsUsedToday = obj.Body[0].EnergyReal_WAC_Sum_Consumed;
@@ -931,34 +955,64 @@
                             var todayGridCost = (gridUnitsUsedToday/1000) * gridKwhPrice;
                             $('#gridUsedCost').text('$ '+ todayGridCost.toFixed(2));
                             
-                            var solarUnitsConsumed = kWhTotalGenerated - (unitsFedIn/1000);
-                            $("#totalConsumed").text(solarUnitsConsumed.toFixed(2) + " kWh");
-                            $('#solarUnitsUsedToday').text($("#totalConsumed").text());
-
-                            var todaySolarUseSavings = solarUnitsConsumed * gridKwhPrice;
-                            $('#solarUsedSavings').text('$ '+ todaySolarUseSavings.toFixed(2));
-
-                            var feedInPay = (unitsFedIn/1000) * feedInKwhPay;
-                            $('#feedInPayToday').text('$ '+ feedInPay.toFixed(2));
-
-                            var totalOverallSaving = todaySolarUseSavings + feedInPay - todayGridCost;
-                            $('#totalSavedToday').text('$ ' + totalOverallSaving.toFixed(2));
-                            if(totalOverallSaving > 0){
-                                $('#totalSavedToday').attr('style', 'color:green');
+                            var solarUnitsConsumed = 0;
+                            if(kWhTotalGenerated === 0){
+                                $("#totalConsumed").text("0 kWh");
+                                $('#solarUnitsUsedToday').text($("#totalConsumed").text());
+                                $('#solarUsedSavings').text('$ 0');
+                                $('#feedInPayToday').text('$ 0');
+                                $('#totalSavedToday').text('$ 0');
+                                $('#synergyImpact').text('$ 0');
+                                $('#unitsFedInToday').text('0');
                             }else{
-                                $('#totalSavedToday').attr('style', 'color:red');
-                            }
 
-                            var synergyImpact = feedInPay - todayGridCost;
-                            $('#synergyImpact').text('$ ' + synergyImpact.toFixed(2));
-                            $('#estimateLiveCost').text($('#synergyImpact').text());
-                            if(synergyImpact > 0){
-                                $('#synergyImpact').attr('style', 'color:green');
-                                $('#estimateLiveCost').attr('style', 'color:green');
-                            }else{
-                                $('#synergyImpact').attr('style', 'color:red');
-                                $('#estimateLiveCost').attr('style', 'color:red');
+                                var unitsFedIn = obj.Body[0].EnergyReal_WAC_Sum_Produced;
+                            
+                                if(unitsFedIn > 1000){
+                                    $('#actualUnitsFedIn').text((unitsFedIn/1000).toFixed(2) + " kWh");
+                                
+                                }else{
+                                    $('#actualUnitsFedIn').text((unitsFedIn).toFixed(2) + " Wh");
+                                }
+
+                                $('#unitsFedInToday').text($('#actualUnitsFedIn').text());
+                                
+                                var solarUnitsConsumed = kWhTotalGenerated - (unitsFedIn/1000);
+                                $("#totalConsumed").text(solarUnitsConsumed.toFixed(2) + " kWh");
+                                $('#solarUnitsUsedToday').text($("#totalConsumed").text());
+
+                                var todaySolarUseSavings = solarUnitsConsumed * gridKwhPrice;
+                                $('#solarUsedSavings').text('$ '+ todaySolarUseSavings.toFixed(2));
+                                var feedInPay = (unitsFedIn/1000) * feedInKwhPay;
+                                $('#feedInPayToday').text('$ '+ feedInPay.toFixed(2));
+
+                                var totalOverallSaving = todaySolarUseSavings + feedInPay - todayGridCost;
+                                $('#totalSavedToday').text('$ ' + totalOverallSaving.toFixed(2));
+                                if(totalOverallSaving > 0){
+                                    $('#totalSavedToday').attr('style', 'color:green');
+                                }else{
+                                    $('#totalSavedToday').attr('style', 'color:red');
+                                }
+
+                                var synergyImpact = feedInPay - todayGridCost;
+                                $('#synergyImpact').text('$ ' + synergyImpact.toFixed(2));
+                                $('#estimateLiveCost').text($('#synergyImpact').text());
+
+                                if(synergyImpact > 0){
+                                    $('#synergyImpact').attr('style', 'color:green');
+                                    $('#estimateLiveCost').attr('style', 'color:green');
+                                }else{
+                                    $('#synergyImpact').attr('style', 'color:red');
+                                    $('#estimateLiveCost').attr('style', 'color:red');
+                                }
+
                             }
+                            
+
+                            
+
+                            
+                            
 
                            
                             //
