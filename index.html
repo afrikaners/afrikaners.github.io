@@ -639,7 +639,7 @@
 
                             var obj = JSON.parse(dataString);
                             currentRealtimeConsumption = obj.Body.Site.P_Load;
-                            currentRealtimeGridFeedIn = Math.abs(obj.Body.Site.P_Grid);
+                            currentRealtimeGridFeedIn = obj.Body.Site.P_Grid;
 
                             feedingIntoGrid = currentRealtimeConsumption < 0;
                         
