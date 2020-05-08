@@ -651,11 +651,16 @@
                                 $('#currentConsumption').text(Math.abs(currentRealtimeConsumption).toFixed(2) + " W");
                             }
 
-                            if(currentRealtimeGridFeedIn > 1000){
-                                $('#currentFeedIn').text((currentRealtimeGridFeedIn/1000).toFixed(2) + " kW");
+                            if(currentRealtimeGridFeedIn < 0){
+                                if(currentRealtimeGridFeedIn > 1000){
+                                    $('#currentFeedIn').text((currentRealtimeGridFeedIn/1000).toFixed(2) + " kW");
+                                }else{
+                                    $('#currentFeedIn').text(currentRealtimeGridFeedIn.toFixed(2) + " W");
+                                }
                             }else{
-                                $('#currentFeedIn').text(currentRealtimeGridFeedIn.toFixed(2) + " W");
+                                $('#currentFeedIn').text("0 W");
                             }
+                            
                             
                             if(feedingIntoGrid){
                                 $('#exportingToGrid').hide();
