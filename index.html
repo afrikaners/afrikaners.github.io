@@ -101,14 +101,42 @@
             <div id="busyHours" class="col-md-6 col-sm-6" style="padding-left:40px;padding-right:40px;">
                 
                 <div class="row">
-                    <div class="col-xs-12"><h1>Realtime Generation:</h1></div>
+                    <div class="col-xs-6"><h4>Realtime Data:</h4></div>
                 </div>
                 <div class="row" style="height:155px;overflow:hidden;">
-                    <div class="col-xs-12">
-                        <div style="width:400px;height:155px;overflow:hidden;" id="gauge"></div>
-                        <div style="width:100%;text-align:left;position:absolute; top: 30px; left:130px">
-                            <h1 style="top:40px;left:10px;position:absolute;" id="powerGen">Loading...</h1>
+                    <div class="col-xs-6">
+                        <div style="width:200px;height:75px;overflow:hidden;" id="gauge"></div>
+                        <div style="width:100%;text-align:left;position:absolute; top: 20px; left:24px">
+                            <h2 style="top:40px;left:25px;position:absolute;" id="powerGen">Loading...</h2>
                             <h4 style="position:absolute;top:10px;left:60px;" id="percentage"></h4>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <img id="consumingFromGrid" src="right.png" style="display:none;width:100px"/>
+                                <img id="exportingToGrid" src="left.png" style="display:none;width:100px"/>
+                             
+                            </div>
+                            <div class="col-xs-6">
+                                <img style="width:80px" src="grid.svg"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h6>Consumption</h6>
+                            </div>
+                            <div class="col-xs-6">
+                                <h5 id="currentConsumption"></h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h6>Feed In</h6>
+                            </div>
+                            <div class="col-xs-6">
+                                <h5 id="currentFeedIn"></h5>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -301,12 +329,14 @@
         var medsAlertSent10pm = false;
         var firstLoad = true;
 
-        var feedInKwhPay = 0.071;
+        var feedInKwhPay = 0.07135;
         var gridKwhPrice = 0.262026;
         var avgDailyGridUse = 4.384615385;
         var avgDailySolarUse = 3.168423684;
         var todaySolarUseActual, todayGridUseActual, dateLastLogged, totalGridUseActual, totalFeedInActual, todayGeneratedActual, todayTotalUsedActual;
-
+        var currentRealtimeConsumption;
+        var currentRealtimeGridFeedIn;
+        var feedingIntoGrid;
 
         var medsTaken = false;
 
@@ -597,166 +627,219 @@
                 try{
 
                     checkAlerts();
-                   
-                    $.get("https://valuehold2.apphb.com/api/values", function (data) {
-                        // alert( "Data Loaded: " +  );
-                        var dataString = JSON.stringify(data);
-                        //console.log(dataString);
-                        dataString = dataString.replace(/\\n/g, "");
-                        dataString = dataString.replace(/\\/g, "");
-                        dataString = dataString.replace(/ /g, '');
-                        dataString = dataString.substring(1);
-                        dataString = dataString.substring(0, dataString.length - 1);
 
-                        if(dataString !== 'NoData'){
+                    $.get("http://valuehold2.apphb.com/api/solarflowdata",function(data){
+                            var dataString = JSON.stringify(data);
+                            //console.log(dataString);
+                            dataString = dataString.replace(/\\n/g, "");
+                            dataString = dataString.replace(/\\/g, "");
+                            dataString = dataString.replace(/ /g, '');
+                            dataString = dataString.substring(1);
+                            dataString = dataString.substring(0, dataString.length - 1);
+
                             var obj = JSON.parse(dataString);
-                            var powerGenVal = obj.Body.PAC.Values["1"];
-                            var integer = parseInt(powerGenVal, 10);
+                            currentRealtimeConsumption = obj.Body.Site.P_Load;
+                            currentRealtimeGridFeedIn = Math.abs(obj.Body.Site.P_Grid);
 
-                            if(integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
-                                $('#afterhours').show();
-                                $('#busyHours').hide();
-                                $('#dayEnd_Error').hide();
-                                loadSolarBaseSettings(true);
-                            }else{
-                                $('#afterhours').hide();
-                                $('#busyHours').show();
-                            }
-                            
-                            if (integer > 1000) {
-                                $("#powerGen").text((integer / 1000) + ' kW');
-
-                                if (integer > 1600) {
-                                    $('#wasmasjien').show();
-                                } else {
-                                    $('#wasmasjien').hide();
-                                }
-                                if (integer > 2200) {
-                                    $('#skottelgoed').show();
-                                    $('#oond').show();
-                                } else {
-                                    $('#skottelgoed').hide();
-                                    $('#oond').hide();
-                                }
-                                if (integer > 4000) {
-                                    $('#aircon').show();
-                                    $('#aircon').text("Aircon HIGH");
-                                    airconThresholdBreachCounter = 0;
-                                } else if (integer > 3000) {
-                                    $('#aircon').show();
-                                    $('#aircon').text("Aircon MEDIUM");
-                                    airconThresholdBreachCounter = 0;
-                                } else if (integer > 2100) {
-                                    $('#aircon').show();
-                                    $('#aircon').text("Aircon LOW");
-                                    airconThresholdBreachCounter = 0;
-                                } else if (integer > 1500) {
-                                    checkAndSendAirconThresholdNotification(integer);
-                                    airconThresholdBreachCounter ++;
-                                    $('#aircon').show();
-                                    $('#aircon').text("Aircon FAN ONLY");
-                                } else {
-                                    $('#aircon').hide();
-                                }
-
-                            } else {
-                                checkAndSendAirconThresholdNotification(integer);
-                                $("#powerGen").text(integer + ' w');
-                                if(integer == 0){
-                                    if(new Date().getHours() >= 20 || new Date().getHours() < 7){
-                                        $('#body').hide();
-                                        $('html').on('click', function(){$('#body').show();});
-                                    }
-
-                                    timeout = 600000; // 10 mins;
-                                }else{
-                                    $('#body').show();
-                                    $('html').on('click', function(){});
-                                    $('#afterhours').hide();
-                                    $('#busyHours').show();
-                                    timeout = 6000; // 6 seconds
-                                }
-                            }
-
-                            var gaugeVal = ((integer / 1000)/5*100).toFixed(2);
-                            gauge.refresh(gaugeVal);
-                            setGauge(gaugeVal);
-                            
-                            if(gaugeVal>0){
-                                $('#percentage').text(gaugeVal+"%");
-                            }else{
-                                $('#percentage').text("0%");
-                            }
+                            feedingIntoGrid = currentRealtimeConsumption < 0;
                         
-                            var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
-    
-                            setProgress(kWhTotalGenerated, true);
-                            ////$("#powerTotal").text((kWhTotalGenerated) + " kWh");
-                            $("#dayEnd_TotalGenerated").text($('#powerTotal').text());
-                            $('#dayEnd_MonthExpected').text(monthExpected + ' kWh');
-                            $('#stats').show();
-                            
-                            setEstimatePricingValues(kWhTotalGenerated);
                             
 
-                            if(kWhTotalGenerated <= monthExpected){
-                                $("#dayEnd_TotalGenerated").attr('style', 'color:red');
+                            if(currentRealtimeConsumption > 1000){
+                                $('#currentConsumption').text(Math.abs((currentRealtimeConsumption/1000)).toFixed(2) + " kW");
                             }else{
-                                $("#dayEnd_TotalGenerated").attr('style', 'color:green');
-                            }
-                            
-                            //var powerTotalText = $("#powerTotal").text();
-                            
-                            var recordGenerated = getRecordPowerGeneratedForNow(integer);
-                            if(recordGenerated){
-                                recordGenerated = recordGenerated.replace('kWh','');
-                                var now = new Date();
-                                //don't trigger before 4pm.
-                                if(now.getHours() >= 16 && kWhTotalGenerated > recordGenerated){
-                                    if(!newHighAlertSent){
-                                        newHighAlertSent = true;
-                                        sendNotification("Fronius", "New highest daily record!");
-                                    }
-                                    $("#powerTotalFromRecord").html('<span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
-                                }else{
-                                    $("#powerTotalFromRecord").html('<span class="noRecord">(' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
-                                }
-                            }
-                        }else{
-                            //api server data got cleared. Temp error state
-                            $('#afterhours').show();
-                            $('#dayEnd_Error').hide();
-                            $('#stats').hide();
-                            $('#busyHours').hide();
-                            $("#dayEnd_TotalGenerated").text("Error loading data from Server...");
-                            $('#dayEnd_MonthExpected').text('');
-
-                            if(new Date().getHours() >= 21){
-                                $('#body').hide();
-                                $('html').on('click', function(){$('#body').show();});
+                                $('#currentConsumption').text(Math.abs(currentRealtimeConsumption).toFixed(2) + " W");
                             }
 
-                            timeout = 600000; // 10 mins;
-                        }
-                        firstLoad = false; 
-                        setTimeout(function () { load(); }, timeout);
-                    })
-                    .fail(function() {
-                        console.log('fail');
-                        $('#afterhours').show();
-                        $('#busyHours').hide();
-                        $('#dayEnd_Error').show();
-                        $('#stats').hide();
-                        $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
-                        setTimeout(function () { load(); loadWeather();}, timeout);
-                    });
+                            if(currentRealtimeGridFeedIn > 1000){
+                                $('#currentFeedIn').text((currentRealtimeGridFeedIn/1000).toFixed(2) + " kW");
+                            }else{
+                                $('#currentFeedIn').text(currentRealtimeGridFeedIn.toFixed(2) + " W");
+                            }
+                            
+                            if(feedingIntoGrid){
+                                $('#exportingToGrid').hide();
+                                $('#consumingFromGrid').show();
+                            }else{
+                                $('#exportingToGrid').show();
+                                $('#consumingFromGrid').hide();
+                            }
+
+                    }).done(function(){
+                        loadTheRest();
+                    }).fail(failedLoading);
+                   
+                    
                 }catch(ex){
                     console.log('exception');
                     setTimeout(function () { load(); }, timeout);
                 }
             }
            
+            function loadTheRest(){
+
+                $.get("https://valuehold2.apphb.com/api/values", function (data) {
+                    // alert( "Data Loaded: " +  );
+                    var dataString = JSON.stringify(data);
+                    //console.log(dataString);
+                    dataString = dataString.replace(/\\n/g, "");
+                    dataString = dataString.replace(/\\/g, "");
+                    dataString = dataString.replace(/ /g, '');
+                    dataString = dataString.substring(1);
+                    dataString = dataString.substring(0, dataString.length - 1);
+
+                    if(dataString !== 'NoData'){
+                        var obj = JSON.parse(dataString);
+                        var powerGenVal = obj.Body.PAC.Values["1"];
+                        var integer = parseInt(powerGenVal, 10);
+
+                        if(integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
+                            $('#afterhours').show();
+                            $('#busyHours').hide();
+                            $('#dayEnd_Error').hide();
+                            loadSolarBaseSettings(true);
+                        }else{
+                            $('#afterhours').hide();
+                            $('#busyHours').show();
+                        }
+                        
+                        console.log('aaa');
+                        console.log(currentRealtimeGridFeedIn);
+
+                        if (currentRealtimeGridFeedIn > 1000) {
+                            $("#powerGen").text((integer / 1000) + ' kW');
+
+                            if (currentRealtimeGridFeedIn > 1600) {
+                                $('#wasmasjien').show();
+                            } else {
+                                $('#wasmasjien').hide();
+                            }
+                            if (currentRealtimeGridFeedIn > 2200) {
+                                $('#skottelgoed').show();
+                                $('#oond').show();
+                            } else {
+                                $('#skottelgoed').hide();
+                                $('#oond').hide();
+                            }
+                            if (currentRealtimeGridFeedIn > 4000) {
+                                $('#aircon').show();
+                                $('#aircon').text("Aircon HIGH");
+                                airconThresholdBreachCounter = 0;
+                            } else if (currentRealtimeGridFeedIn > 3000) {
+                                $('#aircon').show();
+                                $('#aircon').text("Aircon MEDIUM");
+                                airconThresholdBreachCounter = 0;
+                            } else if (currentRealtimeGridFeedIn > 2100) {
+                                $('#aircon').show();
+                                $('#aircon').text("Aircon LOW");
+                                airconThresholdBreachCounter = 0;
+                            } else if (currentRealtimeGridFeedIn > 1500) {
+                                checkAndSendAirconThresholdNotification(currentRealtimeGridFeedIn);
+                                airconThresholdBreachCounter ++;
+                                $('#aircon').show();
+                                $('#aircon').text("Aircon FAN ONLY");
+                            } else {
+                                $('#aircon').hide();
+                            }
+
+                        } else {
+                            checkAndSendAirconThresholdNotification(integer);
+                            $("#powerGen").text(integer + ' w');
+                            if(integer == 0){
+                                if(new Date().getHours() >= 20 || new Date().getHours() < 7){
+                                    $('#body').hide();
+                                    $('html').on('click', function(){$('#body').show();});
+                                }
+
+                                timeout = 600000; // 10 mins;
+                            }else{
+                                $('#body').show();
+                                $('html').on('click', function(){});
+                                $('#afterhours').hide();
+                                $('#busyHours').show();
+                                timeout = 6000; // 6 seconds
+                            }
+                        }
+
+                        var gaugeVal = ((integer / 1000)/5*100).toFixed(2);
+                        gauge.refresh(gaugeVal);
+                        setGauge(gaugeVal);
+                        
+                        if(gaugeVal>0){
+                            $('#percentage').text(gaugeVal+"%");
+                        }else{
+                            $('#percentage').text("0%");
+                        }
+                    
+                        var kWhTotalGenerated = obj.Body.DAY_ENERGY.Values["1"] / 1000;
+
+                        setProgress(kWhTotalGenerated, true);
+                        ////$("#powerTotal").text((kWhTotalGenerated) + " kWh");
+                        $("#dayEnd_TotalGenerated").text($('#powerTotal').text());
+                        $('#dayEnd_MonthExpected').text(monthExpected + ' kWh');
+                        $('#stats').show();
+                        
+                        setEstimatePricingValues(kWhTotalGenerated);
+                        
+
+                        if(kWhTotalGenerated <= monthExpected){
+                            $("#dayEnd_TotalGenerated").attr('style', 'color:red');
+                        }else{
+                            $("#dayEnd_TotalGenerated").attr('style', 'color:green');
+                        }
+                        
+                        //var powerTotalText = $("#powerTotal").text();
+                        
+                        var recordGenerated = getRecordPowerGeneratedForNow(integer);
+                        if(recordGenerated){
+                            recordGenerated = recordGenerated.replace('kWh','');
+                            var now = new Date();
+                            //don't trigger before 4pm.
+                            if(now.getHours() >= 16 && kWhTotalGenerated > recordGenerated){
+                                if(!newHighAlertSent){
+                                    newHighAlertSent = true;
+                                    sendNotification("Fronius", "New highest daily record!");
+                                }
+                                $("#powerTotalFromRecord").html('<span class="newRecord">(+' + (kWhTotalGenerated - recordGenerated).toFixed(2) + ' kWh)</span>');
+                            }else{
+                                $("#powerTotalFromRecord").html('<span class="noRecord">(' + (recordGenerated -  kWhTotalGenerated).toFixed(2) + ' kWh)</span>');
+                            }
+                        }
+                    }else{
+                        //api server data got cleared. Temp error state
+                        $('#afterhours').show();
+                        $('#dayEnd_Error').hide();
+                        $('#stats').hide();
+                        $('#busyHours').hide();
+                        $("#dayEnd_TotalGenerated").text("Error loading data from Server...");
+                        $('#dayEnd_MonthExpected').text('');
+
+                        if(new Date().getHours() >= 21){
+                            $('#body').hide();
+                            $('html').on('click', function(){$('#body').show();});
+                        }
+
+                        timeout = 600000; // 10 mins;
+                    }
+                    firstLoad = false; 
+                    setTimeout(function () { load(); }, timeout);
+                })
+                .fail(failedLoading);
+
+            }
         });
+
+
+        function failedLoading(){
+            console.log('fail');
+                    $('#afterhours').show();
+                    $('#busyHours').hide();
+                    $('#dayEnd_Error').show();
+                    $('#stats').hide();
+                    $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
+                    setTimeout(function () { load(); loadWeather();}, timeout);
+        }
+        
 
         function setEstimatePricingValues(kWhTotalGenerated){
             var price =(avgDailyGridUse*gridKwhPrice)-((kWhTotalGenerated-avgDailySolarUse)*feedInKwhPay);
