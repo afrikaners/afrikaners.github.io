@@ -673,7 +673,7 @@
 
             function loadSolarFlowData(){
 
-                if((new Date().getHours() >= 18 || new Date().getHours() < 0) || (new Date().getHours() >= 5 || new Date().getHours() < 7)){
+                if((new Date().getHours() >= 18 && new Date().getHours() < 0) || (new Date().getHours() >= 5 && new Date().getHours() < 7)){
                     setTimeout(function () { loadSolarFlowData(); }, 10000);
                 }
 
