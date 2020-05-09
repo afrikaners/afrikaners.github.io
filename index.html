@@ -341,6 +341,7 @@
                         <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" /><br/><br/>
                         <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" /><br/><br/>
                         <input type="button" id="forceAfterhoursStats" value="After Hours Stats Forced: false" /><br/><br/>
+                        <input type="button" id="forcePvOutputUpdate" value="Force PV Output Update" /><br/><br/>
                         <div id="error"></div>
                     </div>
                 </div>
@@ -423,7 +424,7 @@
                     }
                 }
 
-                loadPVOutputData();
+                loadPVOutputData(false);
 
                 $('#notifyAircon').click(function(){
                     notifyAirconThreshold = !notifyAirconThreshold;
@@ -444,7 +445,9 @@
                     $('#forceAfterhoursStats').attr('value', 'After Hours Stats Forced: ' + forceAfterHours);
                 });
 
-                
+                $('#forcePvOutputUpdate').click(function(){
+                    loadPVOutputData(true);
+                });
 
                 load();
                 loadWeather();
@@ -487,76 +490,6 @@
             }catch(ex){
                 alert(ex.message);
             }
-
-            /*function loadSolarBaseSettings(checkAndUpdateUi){
-                try{
-
-                    $.get("https://valuehold2.apphb.com/api/solardata", function (data) {
-                         avgDailyGridUse = data.avgDailyGridUse;
-                         avgDailySolarUse = data.avgDailSolarUse;
-                         feedInKwhPay = data.feedInKwhPay;
-                         gridKwhPrice = data.gridKwhFee;
-                         todaySolarUseActual = data.todaySolarUse; 
-                         todayGridUseActual = data.todayGridUse; 
-                         dateLastLogged = data.dateLastLogged;
-                         totalGridUseActual = data.totalGridUse; 
-                         totalFeedInActual = data.totalFeedIn;
-                         todayGeneratedActual = data.todayGenerated;
-                         todayTotalUsedActual = data.todayTotalUsed;
-
-                         if(checkAndUpdateUi){
-                             var now = new Date();
-                             var month = now.getMonth()+1;
-                             var day = now.getDate();
-                             if(month < 10){
-                                 month = "0"+month;
-                             }
-                             if(day < 10){
-                                 day = "0"+day;
-                             }
-                             var today =  day + "/" + month + "/" + now.getFullYear();
-                             if(today === dateLastLogged){
-                                $('#estimateStats').hide();
-                                $('#actualStats').show();
-                                
-                                var feedInPay = (todayGeneratedActual-todaySolarUseActual)*feedInKwhPay;
-                                var gridUsedFee = todayGridUseActual*gridKwhPrice;
-                                var solarUsedSavings = todaySolarUseActual*gridKwhPrice;
-                                var totalSaved = feedInPay - gridUsedFee;
-                                var savingsIncludingSolarUse = totalSaved + solarUsedSavings;
-
-                                $('#totalSavedToday').text("$ " + savingsIncludingSolarUse.toFixed(2));
-                                if(savingsIncludingSolarUse > 0){
-                                    $('#totalSavedToday').attr("style", "color:lightgreen");
-                                }else{
-                                    $('#totalSavedToday').attr("style", "color:red");
-                                }
-                                
-                                $('#synergyImpact').text("$ " + totalSaved.toFixed(4));
-                                if(totalSaved > 0){
-                                    $('#synergyImpact').attr("style", "color:lightgreen");
-                                }else{
-                                    $('#synergyImpact').attr("style", "color:red");
-                                }
-                                $('#feedInPayToday').text("$ " + feedInPay.toFixed(2));
-                                $('#gridUsedCost').text("$ " + gridUsedFee);
-                                $('#gridUsedCost').attr("style", "color:red");
-                                $('#unitsFedInToday').text(todayGeneratedActual-todaySolarUseActual.toFixed(2) + "kWh");
-                                $('#solarUnitsUsedToday').text(todaySolarUseActual + " kWh");
-                                $('#gridUnitsUsedToday').text(todayGridUseActual + " kWh");
-                                $('#solarUsedSavings').text("$ " + solarUsedSavings.toFixed(2));
-                                $('#solarUsedSavings').attr("style", "color:lightgreen");
-
-                             }
-                         }else{
-                            $('#estimateStats').show();
-                            $('#actualStats').hide();
-                         }
-                    });
-                }catch(ex){
-                   console.log('error loading base settings...');
-                }
-            }*/
 
             function loadWeather(){
                 try{
@@ -913,7 +846,7 @@
 
             }
 
-            function loadPVOutputData(){
+            function loadPVOutputData(forceUpdate){
                 console.log("loadPVOutputData called");
                 if(!queryString["pvkey"]){
                     $('#actualStats').hide();
@@ -923,9 +856,15 @@
                 var today = new Date();
                 var nowHour = today.getHours();
 
-                if(nowHour < 6 || nowHour > 22){
-                    return;
+                if(!forceUpdate){
+                    if(nowHour < 6 || nowHour >= 20){
+                        $('#actualStats').hide();
+                        return;
+                    }
+                }else{
+                    $('#actualStats').show();
                 }
+                
 
                 var month = today.getMonth()+1;
                 if(month < 10){
@@ -1026,104 +965,9 @@
                 });
 
                 //every 10 minutes
-                setTimeout(loadPVOutputData, 600000);
+                setTimeout(function(){loadPVOutputData(false);}, 600000);
             }
         
-            /*function loadMeterData(kWhTotalGenerated){
-
-                $.get("https://valuehold2.apphb.com/api/solarmeterdata",function(data){
-
-                    if(!$('#afterhours').is(':visible'))
-                        $("#solarMeterData").show();
-                            var dataString = JSON.stringify(data);
-                            //console.log(dataString);
-                            dataString = dataString.replace(/\\n/g, "");
-                            dataString = dataString.replace(/\\/g, "");
-                            dataString = dataString.replace(/ /g, '');
-                            dataString = dataString.substring(1);
-                            dataString = dataString.substring(0, dataString.length - 1);
-
-                            var obj = JSON.parse(dataString);
-                           
-                            //
-                            
-
-                            //var calc_GridUnitsUsedToday = obj.Body[0].EnergyReal_WAC_Sum_Consumed;
-                            var calc_SolarUnitsUsedToday = obj.Body[0].EnergyReal_WAC_Sum_Consumed - obj.Body[0].PowerApparent_S_Sum;
-                            var calc_SolarUnitsFedInToday = (kWhTotalGenerated*1000) - calc_SolarUnitsUsedToday;
-                            var calc_GridUnitsUsedToday = obj.Body[0].PowerApparent_S_Sum;
-                            //console.clear();
-                            console.log("PowerApparent_S_Sum: " +  obj.Body[0].PowerApparent_S_Sum);
-                            console.log("PowerReal_P_Sum: " +  obj.Body[0].PowerReal_P_Sum);
-                            console.log("Total Solar Units generated today: " +  (kWhTotalGenerated*1000));
-                            console.log("Solar Units consumed (PowerApparent_S_Sum): " + calc_SolarUnitsUsedToday);
-                            console.log("Solar Units Fed In Today: " + calc_SolarUnitsFedInToday);
-                            console.log("Percentage of Solar Used Today: " + calc_SolarUnitsUsedToday / (kWhTotalGenerated*1000) * 100);
-                            console.log("Direct Grid Usage: " + calc_GridUnitsUsedToday);
-
-                            
-                            if(calc_GridUnitsUsedToday > 1000){
-                                $('#gridUnitsUsedToday').text((calc_GridUnitsUsedToday/1000).toFixed(2) + " kWh");
-                            }else{
-                                $('#gridUnitsUsedToday').text((calc_GridUnitsUsedToday).toFixed(2) + " Wh");
-                            }
-
-                            var todayGridCost = (calc_GridUnitsUsedToday/1000) * gridKwhPrice;
-                            $('#gridUsedCost').text('$ '+ todayGridCost.toFixed(2));
-
-                            if(kWhTotalGenerated === 0){
-                                $("#totalConsumed").text("0 kWh");
-                                $('#solarUnitsUsedToday').text($("#totalConsumed").text());
-                                $('#solarUsedSavings').text('$ 0');
-                                $('#feedInPayToday').text('$ 0');
-                                $('#totalSavedToday').text('$ 0');
-                                $('#synergyImpact').text('$ 0');
-                                $('#unitsFedInToday').text('0');
-                            }else{
-                            
-                                if(calc_SolarUnitsFedInToday > 1000){
-                                    $('#actualUnitsFedIn').text((calc_SolarUnitsFedInToday/1000).toFixed(2) + " kWh");
-                                
-                                }else{
-                                    $('#actualUnitsFedIn').text((calc_SolarUnitsFedInToday).toFixed(2) + " Wh");
-                                }
-
-                                $('#unitsFedInToday').text($('#actualUnitsFedIn').text());
-                                
-                                
-                                $("#totalConsumed").text(calc_SolarUnitsUsedToday.toFixed(2) + " kWh");
-                                $('#solarUnitsUsedToday').text($("#totalConsumed").text());
-
-                                var todaySolarUseSavings = (calc_SolarUnitsUsedToday/1000) * gridKwhPrice;
-                                $('#solarUsedSavings').text('$ '+ todaySolarUseSavings.toFixed(2));
-                                var feedInPay = (calc_SolarUnitsFedInToday/1000) * feedInKwhPay;
-                                $('#feedInPayToday').text('$ '+ feedInPay.toFixed(2));
-
-                                var totalOverallSaving = todaySolarUseSavings + feedInPay - todayGridCost;
-                                $('#totalSavedToday').text('$ ' + totalOverallSaving.toFixed(2));
-                                if(totalOverallSaving > 0){
-                                    $('#totalSavedToday').attr('style', 'color:green');
-                                }else{
-                                    $('#totalSavedToday').attr('style', 'color:red');
-                                }
-
-                                var synergyImpact = feedInPay - todayGridCost;
-                                $('#synergyImpact').text('$ ' + synergyImpact.toFixed(2));
-                                $('#estimateLiveCost').text($('#synergyImpact').text());
-
-                                if(synergyImpact > 0){
-                                    $('#synergyImpact').attr('style', 'color:green');
-                                    $('#estimateLiveCost').attr('style', 'color:green');
-                                }else{
-                                    $('#synergyImpact').attr('style', 'color:red');
-                                    $('#estimateLiveCost').attr('style', 'color:red');
-                                }
-                            }   
-
-                }).fail(function(){
-                    $("#solarMeterData").hide();
-                });
-            }*/
         });
 
 
@@ -1137,23 +981,6 @@
                     $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
                     setTimeout(function () { load(); loadWeather();}, timeout);
         }
-        
-
-        /*function setEstimatePricingValues(kWhTotalGenerated){
-            var price =(avgDailyGridUse*gridKwhPrice)-((kWhTotalGenerated-avgDailySolarUse)*feedInKwhPay);
-                        
-            if(price < 0){
-                $('#stats_feedin_price').text('$'+(Math.abs(price)).toFixed(2));
-                $('#stats_feedin_price').css('color', 'green');
-                $('#estimateLiveCost').html('<span>($' + Math.abs(price).toFixed(4) + ')</span>');
-                $('#estimateLiveCost').css('color', 'green');
-            }else{
-                $('#stats_feedin_price').text('$'+price.toFixed(2));
-                $('#stats_feedin_price').css('color', 'red');
-                $('#estimateLiveCost').text('($' + price.toFixed(4) + ')');
-                $('#estimateLiveCost').css('color', 'red');
-            }
-        }*/
 
         var monthExpected;
         var newkWhMax;
