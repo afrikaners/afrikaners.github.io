@@ -926,7 +926,7 @@
 
                             var obj = JSON.parse(dataString);
                            
-                            console.clear();
+                            //console.clear();
                             
 
                             //var calc_GridUnitsUsedToday = obj.Body[0].EnergyReal_WAC_Sum_Consumed;
@@ -934,11 +934,11 @@
                             var calc_SolarUnitsFedInToday = (kWhTotalGenerated*1000) - calc_SolarUnitsUsedToday;
                             var calc_GridUnitsUsedToday = obj.Body[0].PowerApparent_S_Sum;
                           
-                            console.log("Total Solar Units generated today: " +  (kWhTotalGenerated*1000));
+                            /*console.log("Total Solar Units generated today: " +  (kWhTotalGenerated*1000));
                             console.log("Solar Units consumed (PowerApparent_S_Sum): " + calc_SolarUnitsUsedToday);
                             console.log("Solar Units Fed In Today: " + calc_SolarUnitsFedInToday);
                             console.log("Percentage of Solar Used Today: " + calc_SolarUnitsUsedToday / (kWhTotalGenerated*1000) * 100);
-                            console.log("Direct Grid Usage: " + calc_GridUnitsUsedToday);
+                            console.log("Direct Grid Usage: " + calc_GridUnitsUsedToday);*/
 
                             
                             if(calc_GridUnitsUsedToday > 1000){
