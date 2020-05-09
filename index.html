@@ -813,7 +813,7 @@
                                 $('#aircon').show();
                                 $('#aircon').text("Aircon LOW");
                                 airconThresholdBreachCounter = 0;
-                            } else if (currentRealtimeGridFeedIn > 1500) {
+                            } else if (remainingKw > 1500) {
                                 checkAndSendAirconThresholdNotification(remainingKw);
                                 airconThresholdBreachCounter ++;
                                 $('#aircon').show();
