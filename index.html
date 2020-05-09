@@ -857,7 +857,7 @@
                 var nowHour = today.getHours();
 
                 if(!forceUpdate){
-                    if(nowHour < 6 || nowHour >= 20){
+                    if(nowHour < 6 || nowHour > 23){
                         $('#actualStats').hide();
                         return;
                     }
