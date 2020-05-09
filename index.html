@@ -301,6 +301,7 @@
                         <div style="width: 450px;"><iframe id="weatherWidget" style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=57209" width="450" height="520" frameborder="0"  scrolling="no"></iframe><a style="margin: -20px 0 0 0;position: relative;text-indent: -9999em;z-index: 1;height: 20px;display: block" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Yanchep Forecast</a></div>
                     </div>
                 </div>
+                <div style="visibility: hidden">
                 <div class="row" id="solarMeterData" style="display:none;">
                     <div class="col-xs-2">
                        <h5>Fed In</h5>
@@ -318,7 +319,7 @@
                        <h5 id="totalConsumed"></h5>
                     </div>
                 </div>
-    
+            </div>
             </div>
         </div>
         <div id="pvOutputSection" style="display:none;" class="row section">
@@ -859,7 +860,7 @@
                         }
                         
                         //var powerTotalText = $("#powerTotal").text();
-                        loadMeterData(kWhTotalGenerated);
+                       // loadMeterData(kWhTotalGenerated);
                         var recordGenerated = getRecordPowerGeneratedForNow(integer);
                         if(recordGenerated){
                             recordGenerated = recordGenerated.replace('kWh','');
@@ -915,8 +916,20 @@
 
                             var obj = JSON.parse(dataString);
                            
-                            
+                            console.clear();
+                            var calc_UnitsFedInToday = (kWhTotalGenerated*1000) - obj.Body[0].EnergyReal_WAC_Sum_Consumed;
 
+                            //var calc_GridUnitsUsedToday = obj.Body[0].EnergyReal_WAC_Sum_Consumed;
+                            var calc_SolarUnitsUsedToday = calc_UnitsFedInToday - calc_GridUnitsUsedToday;
+                            var calc_TotalGeneratedTodayCheck = calc_UnitsFedInToday + calc_GridUnitsUsedToday;
+                            console.log("Total Solar Units generated today: " +  (kWhTotalGenerated*1000));
+                            console.log("Units Fed In Today: " +  calc_UnitsFedInToday);
+                            console.log("Total Solar Units used Today: " +  calc_SolarUnitsUsedToday);
+
+                            //  console.log("Grid Units Used Today: " +  calc_GridUnitsUsedToday);
+                            //console.log("Total Units produced Today: " +  calc_TotalGeneratedTodayCheck);
+                            
+                            console.log("Percentage self use today: ");
 
                             var gridUnitsUsedToday = obj.Body[0].EnergyReal_WAC_Sum_Consumed;
 
