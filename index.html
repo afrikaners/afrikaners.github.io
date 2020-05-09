@@ -338,7 +338,6 @@
                         <input type="button" id="toggle" value="Wake Lock is disabled" /><br/><br/>
                         <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" /><br/><br/>
                         <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" /><br/><br/>
-                        <input type="button" id="soundMute" value="Sound Is Muted: false" /><br/><br/>
                         <div id="error"></div>
                     </div>
                 </div>
@@ -377,10 +376,6 @@
         var currentRealtimeConsumption;
         var currentRealtimeGridFeedIn;
         var feedingIntoGrid;
-        var alertSound = new Audio('alert.mp3');
-        var alertSoundTriggerSet = false;
-        var soundsMuted = false;
-
         var medsTaken = false;
 
         var airconMonthEstimates = new Array();
@@ -437,12 +432,6 @@
                     else
                         $("#airconStatus").hide();
                 });
-
-                $('#soundMute').click(function(){
-                    soundsMuted = !soundsMuted;
-                    $('#soundMute').attr('value', 'Sound Is Muted: ' + soundsMuted);
-                });
-                
 
                 load();
                 loadWeather();
@@ -608,7 +597,6 @@
                     resetFlags();
                     //loadSolarBaseSettings();
                 }else if(firstLoad){
-                    alertSound.play();
                     //loadSolarBaseSettings();
                 }
 
@@ -700,20 +688,6 @@
                                 }else{
                                     $('#currentConsumption').text(Math.abs(currentRealtimeConsumption).toFixed(2) + " W");
                                 }
-
-                                var nowHour = new Date().getHours();
-                                if(nowHour > 10 && nowHour < 16){
-                                    if(!soundsMuted && feedingIntoGrid && currentRealtimeGridFeedIn > currentRealtimeConsumption){
-                                        if(alertSoundTriggerSet){
-                                            alertSound.play();
-                                            alertSoundTriggerSet = false;
-                                        }else{
-                                            alertSoundTriggerSet = true;
-                                        }
-                                    }
-                                }
-                                
-
                             }else{
                                 $('#currentConsumption').text("0 W");
                             }
