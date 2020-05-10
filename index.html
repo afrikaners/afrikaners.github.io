@@ -135,7 +135,7 @@
                                 <h6 >Feed In</h6>
                             </div>
                             <div class="col-xs-6">
-                                <h5 style="color:green;" id="currentFeedIn"></h5>
+                                <h5 class="green" style="font-size: bigger;" id="currentFeedIn"></h5>
                             </div>
                         </div>
                         <div class="row">
@@ -711,9 +711,14 @@
                             //loadSolarBaseSettings(true);
                         }else{
                             $('#afterhours').hide();
-                            $('#solarMeterData').show();
+                            if($('#estimateLiveCost').is(':visible')){
+                                $('#solarMeterData').show();
+                            }else{
+                                $('#solarMeterData').hide();
+                            }
+                            
                             $('#busyHours').show();
-                            $('#solarMeterData').show();
+                           
                         }
 
                         var remainingKw = 0;
@@ -850,6 +855,9 @@
                 console.log("loadPVOutputData called");
                 if(!queryString["pvkey"]){
                     $('#actualStats').hide();
+                    $('#estimateLiveCost').hide();
+                    $('#solarMeterData').hide();
+                   
                     return;
                 }
                 
