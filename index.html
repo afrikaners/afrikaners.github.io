@@ -342,6 +342,7 @@
                         <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" /><br/><br/>
                         <input type="button" id="forceAfterhoursStats" value="After Hours Stats Forced: false" /><br/><br/>
                         <input type="button" id="forcePvOutputUpdate" value="Force PV Output Update" /><br/><br/>
+                        <input type="button" id="notifyIfUsingGrid" value="Notify if using Grid Energy: false" /><br/><br/>
                         <div id="error"></div>
                     </div>
                 </div>
@@ -361,7 +362,7 @@
         var notifyAirconThreshold = false;
         var airconThresholdBreachCounter = 0;
         var monitorAirconStatus = 1;
-        var maxNotifications = 10;
+        var maxNotifications = 20;
         var notificationCounter = 0;
         var timeout = 6000;
 
@@ -382,6 +383,8 @@
         var feedingIntoGrid;
         var medsTaken = false;
         var forceAfterHours = false;
+        var notifyIfUsingGridEngergyDuringDay = false;
+        var nextGridUseAlertTime;
 
         var airconMonthEstimates = new Array();
         airconMonthEstimates[0] = 40.9;
@@ -447,6 +450,11 @@
 
                 $('#forcePvOutputUpdate').click(function(){
                     loadPVOutputData(true);
+                });
+
+                $('#notifyIfUsingGrid').click(function(){
+                    notifyIfUsingGridEngergyDuringDay = !notifyIfUsingGridEngergyDuringDay;
+                    $('#notifyIfUsingGrid').attr('value', 'Notify if using Grid Energy: ' + notifyIfUsingGridEngergyDuringDay);
                 });
 
                 load();
@@ -660,16 +668,28 @@
                                 $('#nightCurrentConsumption').text( $('#currentPullFromGrid').text());
 
                             }
-                            
+
                             if(feedingIntoGrid){
                                 $('#exportingToGrid').hide();
                                 $('#consumingFromGrid').show();
+                                
                             }else{
                                 $('#exportingToGrid').show();
                                 $('#consumingFromGrid').hide();
+
+                                if(notifyIfUsingGridEngergyDuringDay && (new Date().getHours() >= 10 && new Date().getHours() <= 17)){
+                                    if(nextGridUseAlertTime == undefined || new Date() >= nextGridUseAlertTime){
+                                        sendNotification('Using Grid Energy!', 'Started using grid energy when we should not be.');
+                                        nextGridUseAlertTime = addMinutes(new Date(),30);
+                                    }
+                                }
                             }
 
                     });
+            }
+
+            function addMinutes(date, minutes) {
+                return new Date(date.getTime() + minutes*60000);
             }
 
             function load() {
@@ -975,20 +995,22 @@
                 //every 10 minutes
                 setTimeout(function(){loadPVOutputData(false);}, 600000);
             }
+
+            function failedLoading(){
+                console.log('fail');
+                        $('#afterhours').show();
+                        $('#solarMeterData').hide();
+                        $('#busyHours').hide();
+                        $('#dayEnd_Error').show();
+                        $('#stats').hide();
+                        $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
+                        setTimeout(function () { load(); loadWeather();}, timeout);
+            }
         
         });
 
 
-        function failedLoading(){
-            console.log('fail');
-                    $('#afterhours').show();
-                    $('#solarMeterData').hide();
-                    $('#busyHours').hide();
-                    $('#dayEnd_Error').show();
-                    $('#stats').hide();
-                    $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
-                    setTimeout(function () { load(); loadWeather();}, timeout);
-        }
+        
 
         var monthExpected;
         var newkWhMax;
