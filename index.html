@@ -677,7 +677,7 @@
                                 $('#exportingToGrid').show();
                                 $('#consumingFromGrid').hide();
 
-                                if(notifyIfUsingGridEngergyDuringDay && (new Date().getHours() >= 10 && new Date().getHours() <= 17)){
+                                if(notifyIfUsingGridEngergyDuringDay && (new Date().getHours() >= 10 && new Date().getHours() <= 16)){
                                     if(nextGridUseAlertTime == undefined || new Date() >= nextGridUseAlertTime){
                                         sendNotification('Using Grid Energy!', 'Started using grid energy when we should not be.');
                                         nextGridUseAlertTime = addMinutes(new Date(),30);
@@ -893,7 +893,6 @@
                     $('#actualStats').show();
                 }
                 
-
                 var month = today.getMonth()+1;
                 if(month < 10){
                     month = "0"+month;
@@ -1008,9 +1007,6 @@
             }
         
         });
-
-
-        
 
         var monthExpected;
         var newkWhMax;
