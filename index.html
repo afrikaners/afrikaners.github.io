@@ -384,6 +384,7 @@
         var medsTaken = false;
         var forceAfterHours = false;
         var notifyIfUsingGridEngergyDuringDay = false;
+        var finalDayNotificationSent = false;
         var nextGridUseAlertTime;
 
         var airconMonthEstimates = new Array();
@@ -523,6 +524,11 @@
             function airconStatus(){
                 if(!monitorAirconStatus)
                     return;
+
+                if(new Date().getHours() > 18 || new Date().getHours()< 7){
+                    return;
+                }
+
                 $.get("https://valuehold2.apphb.com/api/aircon", function (data) {
                     if(data === "ON")
                         $("#airconStatus").show();
@@ -542,6 +548,7 @@
                 medsAlertSent10pm = false;
                 medsTaken = false;
                 notificationCounter = 0;
+                finalDayNotificationSent = false;
             }
 
             function checkAlerts(){
@@ -616,8 +623,8 @@
 
             function loadSolarFlowData(){
 
-                if((new Date().getHours() >= 18 && new Date().getHours() < 0) || (new Date().getHours() >= 5 && new Date().getHours() < 7)){
-                    setTimeout(function () { loadSolarFlowData(); }, 10000);
+                if((new Date().getHours() >= 18 && new Date().getHours() <= 23) || (new Date().getHours() >= 5 && new Date().getHours() < 7)){
+                    setTimeout(function () { loadSolarFlowData(); }, 6000);
                 }
 
                 return $.get("https://valuehold2.apphb.com/api/solarflowdata",function(data){
@@ -786,10 +793,10 @@
                             checkAndSendAirconThresholdNotification(integer);
                             $("#powerGen").text(integer + ' w');
                             if(integer == 0){
-                                if(new Date().getHours() >= 20 || new Date().getHours() < 7){
+                                /*if(new Date().getHours() >= 20 || new Date().getHours() < 7){
                                     $('#body').hide();
                                     $('html').on('click', function(){$('#body').show();});
-                                }
+                                }*/
 
                                 timeout = 600000; // 10 mins;
                             }else{
@@ -915,12 +922,12 @@
                     var totalConsumed = array[11];
                     var totalImport = totalConsumed - totalSolarUsed;
                     //console.clear();
-                    console.log("totalGenerated: " + totalGenerated);
+                    /*console.log("totalGenerated: " + totalGenerated);
                     console.log("totalExport: " + totalExport);
                     console.log("totalConsumed: " + totalConsumed);
                     console.log("totalSolarUsed: " + totalSolarUsed);
                     console.log("totalImport: " + totalImport);
-                    console.log(" ");
+                    console.log(" ");*/
 
                     if(totalImport > 1000){
                         $('#gridUnitsUsedToday').text((totalImport/1000).toFixed(2) + " kWh");
@@ -984,6 +991,14 @@
                             $('#estimateLiveCost').attr('style', 'color:red');
                         }
 
+                        if(new Date().getHours() == 23){
+                            var hourRemainingMinutes = 60 - new Date().getMinutes();
+                            if(finalDayNotificationSent || hourRemainingMinutes > 11)
+                                return;
+
+                           sendNotification('Final Numbers', 'Total Savings: $' + totalOverallSaving.toFixed(2) + ', Synergy Bill Impact: $' +  synergyImpact.toFixed(2) + ', Total Grid units used: ' + $('#gridUnitsUsedToday').text());
+                           finalDayNotificationSent = true;
+                        }
                     }
 
                 }).fail(function(error){
