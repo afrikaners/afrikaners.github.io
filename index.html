@@ -96,6 +96,7 @@
             <div class="container">
                 <ul class="nav navbar-nav">
                     <li id="home" class="active tab" onclick="changeTab('home');"><a href="#">Home</a></li>
+                    <li id="weather" class="tab"><a href="#" onclick="changeTab('weather');">Weather</a></li>
                     <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
                     <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
                     <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
@@ -299,7 +300,10 @@
                 </div>
                 <div class="row" style="display:inline">
                     <div class="col-xs-12 hidden-xs">
-                        <div style="width: 450px;"><iframe id="weatherWidget" style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=57209" width="450" height="520" frameborder="0"  scrolling="no"></iframe><a style="margin: -20px 0 0 0;position: relative;text-indent: -9999em;z-index: 1;height: 20px;display: block" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Yanchep Forecast</a></div>
+                        <a class="weatherwidget-io" href="https://forecast7.com/en/n31d55115d64/yanchep/" data-label_1="YANCHEP" data-label_2="WEATHER" data-days="3" data-theme="dark" >YANCHEP WEATHER</a>
+                        <script>
+                            !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+                        </script>
                     </div>
                 </div>
                 <div style="visibility: visible">
@@ -324,8 +328,12 @@
             </div>
         </div>
         <div id="pvOutputSection" style="display:none;" class="row section">
-            <div class="col-xs-12">
+            <div id="pvOutputDiv" class="col-xs-12">
                 <iframe id="pvOutputIframe" style="display: block;" src="" width="1024" height="4000" frameborder="0"  scrolling="no"></iframe>
+            </div>
+            <div id="Weather" class="col-xs-12" style="display:none">
+                <!--<div style="width: 450px;"><iframe id="weatherWidget" style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=57209" width="450" height="520" frameborder="0"  scrolling="no"></iframe><a style="margin: -20px 0 0 0;position: relative;text-indent: -9999em;z-index: 1;height: 20px;display: block" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">Yanchep Forecast</a></div>-->
+                <div style="width: 1000px;"><iframe  id="weatherWidget" style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=57699" width="1000" height="520" frameborder="0"  scrolling="no"></iframe><a style="text-indent: -9999em;z-index: 1;margin: -20px 0 0 0;display: block;height: 20px;position: relative" href="https://www.willyweather.com.au/wa/perth/yanchep.html" rel="nofollow">https://www.willyweather.com.au/wa/perth/yanchep.html</a></div>
             </div>
         </div>
         <div id="savingsSection" style="display:none;" class="row section">
@@ -459,7 +467,7 @@
                 });
 
                 load();
-                loadWeather();
+                //loadWeather();
                 airconStatus();
 
                 var noSleep = new NoSleep();
@@ -500,15 +508,7 @@
                 alert(ex.message);
             }
 
-            function loadWeather(){
-                try{
-                    $('#weatherWidget').attr('src', '');
-                    setTimeout(function () {$('#weatherWidget').attr('src', "https://cdnres.willyweather.com.au/widget/loadView.html?id=57109")},1000);
-                    setTimeout(function () { loadWeather(); }, 720000);
-                }catch(ex){
-                    setTimeout(function () { loadWeather(); }, 720000);
-                }
-            }
+            
 
             function checkAndSendAirconThresholdNotification(powerGenLevel){
                 if(notifyAirconThreshold && airconThresholdBreachCounter == 4){
@@ -729,7 +729,8 @@
                         var powerGenVal = obj.Body.PAC.Values["1"];
                         var integer = parseInt(powerGenVal, 10);
 
-                        if(forceAfterHours || integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
+                        //if(forceAfterHours || integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
+                        if(false){
                             $('#afterhours').show();
                             $('#solarMeterData').hide();
                             //$('#afterhours').hide();
@@ -1215,10 +1216,22 @@
             });
         }
 
+        function loadWeather(){
+            //try{
+                $('#weatherWidget').attr('src', '');
+                $('#weatherWidget').attr('src', "https://cdnres.willyweather.com.au/widget/loadView.html?id=57109");
+             //   setTimeout(function () {$('#weatherWidget').attr('src', "https://cdnres.willyweather.com.au/widget/loadView.html?id=57109")},1000);
+            //    setTimeout(function () { loadWeather(); }, 720000);
+           // }catch(ex){
+           //     setTimeout(function () { loadWeather(); }, 720000);
+           // }
+        }
+
         function changeTab(mode){
             $('li.tab').removeClass('active');
             $('#pvOutputIframe').attr('src','');
             $('div.section').hide();
+
             if(mode === 'home'){
                 $('#homeSection').show();
                 $('#home').addClass('active');
@@ -1232,19 +1245,29 @@
                 $('#graphImage').attr('src', 'https://valuehold2.apphb.com/api/graph?oid='+queryString["oid"]);
             }else{
                 $('#pvOutputIframe').hide();
+                $('#pvOutputDiv').hide();
+                $('#Weather').hide();
                 $('#pvOutputSection').show();
                 
                 if(mode === 'pvOutput'){
+                    $('#pvOutputDiv').show();
                     $('#pvOutput').addClass('active');
                     $('#pvOutputIframe').attr('src','https://pvoutput.org/intraday.jsp?id=84198&sid=74658');
                 }
                 else if(mode === 'pvOutputRecord'){
+                    $('#pvOutputDiv').show();
                     $('#pvOutputRecord').addClass('active');
                     $('#pvOutputIframe').attr('src','https://pvoutput.org/intraday.jsp?id=84198&sid=74658&dt=20200409&gs=0&m=0');
                 }    
                 else if(mode === 'pvOutputDaily'){
+                    $('#pvOutputDiv').show();
                     $('#pvOutputDaily').addClass('active');
                     $('#pvOutputIframe').attr('src','https://pvoutput.org/list.jsp?id=84198&sid=74658');
+                }
+                else if(mode === 'weather'){
+                    console.log('here');
+                    $('#Weather').show();
+                    loadWeather();
                 }
 
                 $('#pvOutputIframe').show();  
