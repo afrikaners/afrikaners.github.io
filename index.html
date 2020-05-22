@@ -341,21 +341,27 @@
                                 <p style="color:green">Aircon is aan.</p>
                             </div>
                         </div>
-                        <div style="visibility: visible">
-                            <div class="row" id="solarMeterData" style="display:none;">
-                                <div class="col-xs-2">
+                        <div id="solarMeterData" style="display:none;">
+                            <div class="row">&nbsp;</div>
+                            <div class="row" >
+                                <div class="col-xs-3">
                                 <h5>Fed In</h5>
                                 </div>
-                                <div class="col-xs-3">  
+                                <div class="col-xs-2">  
                                     <h5 id="actualUnitsFedIn"></h5>
                                 </div>
-                                <div class="col-xs-2">
-                                    <h5>&nbsp;</h5>
-                                </div>
-                                <div class="col-xs-2">
-                                    <h5>Solar Units Consumed</h5>
-                                </div>
                                 <div class="col-xs-3">
+                                    <h5>Grid Units Used</h5>
+                                </div>
+                                <div class="col-xs-2">
+                                <h5 id="totalImportToday"></h5>
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-xs-3">
+                                    <h5>Solar Units Used</h5>
+                                </div>
+                                <div class="col-xs-2">
                                 <h5 id="solarUnitsConsumed"></h5>
                                 </div>
                             </div>
@@ -765,8 +771,8 @@
                         var powerGenVal = obj.Body.PAC.Values["1"];
                         var integer = parseInt(powerGenVal, 10);
 
-                        if(forceAfterHours || integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
-                        //if(false){
+                        //if(forceAfterHours || integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
+                        if(false){
                             $('#afterhours').show();
                             $('#totalForTodayBlock').hide();
                             $('#solarMeterData').hide();
@@ -831,7 +837,7 @@
                         } else {
                             checkAndSendAirconThresholdNotification(integer);
                             $("#powerGen").text(integer + ' w');
-                            $('#wasmasjien').show();
+
                             if(integer == 0){
                                 /*if(new Date().getHours() >= 20 || new Date().getHours() < 7){
                                     $('#body').hide();
@@ -977,6 +983,11 @@
 
                     var todayImportCost = (totalImport/1000) * gridKwhPrice;
                     $('#gridUsedCost').text('$ '+ todayImportCost.toFixed(2));
+
+                    if(totalImport >= 1000)
+                        $('#totalImportToday').text((totalImport/1000).toFixed(2) + " kWh");
+                    else
+                        $('#totalImportToday').text((totalImport).toFixed(2) + " Wh");
 
                     if(totalGenerated === 0){
                         $("#solarUnitsConsumed").text("0 kWh");
