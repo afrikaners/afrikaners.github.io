@@ -773,8 +773,8 @@
                         var powerGenVal = obj.Body.PAC.Values["1"];
                         var integer = parseInt(powerGenVal, 10);
 
-                        //if(forceAfterHours || integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
-                        if(false){
+                        if(forceAfterHours || integer == 0 && (new Date().getHours() >= 18 || new Date().getHours() < 7)){
+                        //if(false){
                             $('#afterhours').show();
                             $('#totalForTodayBlock').hide();
                             $('#solarMeterData').hide();
