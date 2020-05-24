@@ -2,8 +2,8 @@
 <html>
 
 <head>
-    <meta name="mobile-web-app-capable" content="yes">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> -->
+    <!-- <meta name="mobile-web-app-capable" content="yes"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
         integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
@@ -55,6 +55,42 @@
 
         .widgetBlock-bottom-right{
             margin-top:25px;
+        }
+
+        .realtimeDataColCell{
+                max-height: 100px;
+            }
+
+        #powerGen{
+            position:relative; 
+            top: -90px;
+        }
+
+        #percentage{
+            position:relative;
+            top:-170px;
+        }
+        
+        @media (min-width:100px) and (max-width: 991px){
+          
+
+            .widgetBlock-right, .widgetBlock-bottom-right{
+                min-height: 420px;
+            }
+
+            .widgetBlock-left{
+                margin-left: 0;
+            }
+
+        }
+
+        @media (min-width:992px){
+            #gauge{
+                width: 390px;
+                overflow: hidden;
+                margin:auto;
+            }
+           
         }
 
         .no-padding{
@@ -131,41 +167,44 @@
 </head>
 
 <body id="body">
-    <div class="container-fluid" style="padding:0;">
+    <div class="container-fluid">
        
-        <nav class="navbar navbar-inverse navbar-static-top">
-            <div class="container">
-                <ul class="nav navbar-nav">
-                    <li id="home" class="active tab" onclick="changeTab('home');"><a href="#">Home</a></li>
-                    <li id="weather" class="tab"><a href="#" onclick="changeTab('weather');">Weather</a></li>
-                    <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
-                    <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
-                    <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
-                    <li id="savings" class="tab"><a href="#" onclick="changeTab('savings');">Savings</a></li>
-                    <li id="settings" class="tab"><a href="#" onclick="changeTab('settings');">Settings</a></li>
-                  </ul>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>                        
+            </button>
             </div>
-          </nav>
+            <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav">
+                <li id="home" class="active tab" onclick="changeTab('home');"><a href="#">Home</a></li>
+                <li id="weather" class="tab"><a href="#" onclick="changeTab('weather');">Weather</a></li>
+                <li id="pvOutput" class="tab"><a href="#" onclick="changeTab('pvOutput');">PV Output</a></li>
+                <li id="pvOutputRecord" class="tab"><a href="#" onclick="changeTab('pvOutputRecord');">PVO Record</a></li>
+                <li id="pvOutputDaily" class="tab"><a href="#" onclick="changeTab('pvOutputDaily');">PVO Daily</a></li>
+                <li id="savings" class="tab"><a href="#" onclick="changeTab('savings');">Savings</a></li>
+                <li id="settings" class="tab"><a href="#" onclick="changeTab('settings');">Settings</a></li>
+                </ul>
+            </div>
+        </div>
+        </nav>
 
         <div id="homeSection" class="row section">
-            <div id="busyHours" class="col-md-6 col-sm-6">
-                    <div class="no-padding widgetBlock-left">
+            <div id="busyHours" class="col-sm-12 col-md-6">
+                    <div class="no-padding widgetBlock-left realtimeDataColCell">
                         <div class="row">
-                            <div class="col-xs-6"><h3>Realtime Data:</h3></div>
+                            <div class="col-xs-12"><h3>Realtime Data:</h3></div>
                         </div>
                         <div class="row" >
-                            <!-- <div class="col-xs-12" style="height:155px;overflow:hidden;">
-                                <div style="width:430px;height:175px;overflow:hidden;" id="gauge"></div>
-                                <div style="width:100%;text-align:left;position:absolute; top: 20px; left:160px">
-                                    <h2 style="top:60px;left:10px;position:absolute;" id="powerGen">Loading...</h2>
-                                    <h4 style="position:absolute;top:10px;left:40px;" id="percentage"></h4>
-                                </div>
-                            </div> -->
-                            <div class="col-xs-12" style="position:absolute;text-align: center; align-content: center;">
-                                <div style="width:430px;height:175px;overflow: hidden;margin:auto;" id="gauge"></div>
+
+                            <div class="col-xs-12" style="position:relative;text-align: center; align-content: center;">
+                                <div id="gauge"></div>
                                 
-                                    <h2 style="position:relative; top: -90px;" id="powerGen">Loading...</h2>
-                                    <h4 style="position:relative;top:-190px;" id="percentage"></h4>
+                                    <h2 style="" id="powerGen">Loading...</h2>
+                                    <h4 style="" id="percentage"></h4>
                                 
                             </div>
                            
@@ -184,7 +223,7 @@
                         </div>
                     </div>
             </div>
-            <div id="afterhours" class="col-md-6 col-sm-6" style="display:none">
+            <div id="afterhours" class="col-sm-12 col-md-6" style="display:none;">
                     <div class="no-padding widgetBlock-left">
                         <div class="row">
                             <div class="col-xs-12" style="text-align: center;">
@@ -292,7 +331,7 @@
                         </div>     
                     </div>
             </div>
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-6 col-sm-12">
                     <div class="no-padding widgetBlock-right">
                         <div class="col-xs-12">
                             <div class="row" style="text-align: center;">
@@ -398,15 +437,19 @@
             </div>
         </div>
         <div id="settingsSection" style="display:none;" class="row section">
-            <div class="col-xs-12 setting-buttons">
+            <div class="col-12 setting-buttons">
                 <div class="row">
-                    <div class="col-xs-12 ">
+                    <div class="col-6 col-md-6">
                         <input type="button" id="toggle" value="Wake Lock is disabled" /><br/><br/>
                         <input type="button" id="notifyAircon" value="Notify Aircon Threshold: false" /><br/><br/>
                         <input type="button" id="monitorAirconStatus" value="Monitor Aircon Status: true" /><br/><br/>
                         <input type="button" id="forceAfterhoursStats" value="After Hours Stats Forced: false" /><br/><br/>
-                        <input type="button" id="forcePvOutputUpdate" value="Force PV Output Update" /><br/><br/>
                         <input type="button" id="notifyIfUsingGrid" value="Notify if using Grid Energy: false" /><br/><br/>
+                        <div id="error"></div>
+                    </div>
+                    <div class="col-6 col-md-6">
+                        <input type="button" id="forcePvOutputUpdate" value="Force PV Output Update" /><br/><br/>
+                       
                         <div id="error"></div>
                     </div>
                 </div>
