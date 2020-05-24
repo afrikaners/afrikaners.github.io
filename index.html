@@ -172,6 +172,7 @@
                                 <h1 id="oond" style="display:none" class="green">Oond</h1>
                                 <h1 id="wasmasjien" style="display:none" class="green">Wasmasjien</h1>
                                 <h1 id="aircon" style="display:none" class="green">Aircon</h1>
+                                <h2 id="nada" style="display:none">Te min energie...</h2>
                             </div>
                         </div>
                     </div>
@@ -842,7 +843,7 @@
                         } else {
                             checkAndSendAirconThresholdNotification(integer);
                             $("#powerGen").text(integer + ' w');
-
+                            $('#nada').show();
                             if(integer == 0){
                                 /*if(new Date().getHours() >= 20 || new Date().getHours() < 7){
                                     $('#body').hide();
