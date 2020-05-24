@@ -790,10 +790,8 @@
                             $('#afterhours').show();
                             $('#totalForTodayBlock').hide();
                             $('#solarMeterData').hide();
-                            //$('#afterhours').hide();
                             $('#busyHours').hide();
                             $('#dayEnd_Error').hide();
-                            //loadSolarBaseSettings(true);
                         }else{
                             $('#afterhours').hide();
                             $('#totalForTodayBlock').show();
@@ -862,9 +860,17 @@
                             }else{
                                 $('#body').show();
                                 $('html').on('click', function(){});
-                                $('#afterhours').hide();
+                                if(!forceAfterHours){
+                                    $('#afterhours').hide();
+                                    $('#busyHours').show();
+                                }else{
+                                    $('#afterhours').show();
+                                    $('#busyHours').hide();
+                                }
+                                
+                             
                                 $('#solarMeterData').show();
-                                $('#busyHours').show();
+                                
                                 timeout = 6000; // 6 seconds
                             }
                         }
