@@ -758,11 +758,23 @@
 
             }
 
-            function loadSolarFlowData(){
-
+            function checkAndSetSolarFlowDataTimeout(){
+                console.log('here');
+                console.log(new Date().getHours());
+                console.log(timeout);
                 if((new Date().getHours() >= 18 && new Date().getHours() <= 23) || (new Date().getHours() >= 5 && new Date().getHours() < 7)){
-                    setTimeout(function () { loadSolarFlowData(); }, 6000);
+                    if(timeout === 600000){
+                        setTimeout(function () { loadSolarFlowData(); }, 6000);
+                        //only run this 6 second interval IF the overall timeout runs every 10mins.
+                        //E.g. the hours is between 18 and 23 or 5am - 7am  AND the app is definitely in it's 10 min refresh mode
+                        //then we need this data to still refresh every 6 seconds.
+                    }
                 }
+            }
+
+            function loadSolarFlowData(){
+               
+                checkAndSetSolarFlowDataTimeout();
 
                 return $.get("https://valuehold2.apphb.com/api/solarflowdata",function(data){
                             var dataString = JSON.stringify(data);
@@ -860,8 +872,9 @@
                     dataString = dataString.replace(/ /g, '');
                     dataString = dataString.substring(1);
                     dataString = dataString.substring(0, dataString.length - 1);
-
+                    
                     if(dataString !== 'NoData'){
+                        
                         var obj = JSON.parse(dataString);
                         var powerGenVal = obj.Body.PAC.Values["1"];
                         var integer = parseInt(powerGenVal, 10);
@@ -931,7 +944,7 @@
                             checkAndSendAirconThresholdNotification(integer);
                             $("#powerGen").text(integer + ' w');
                             $('#nada').show();
-                            
+
                             if(integer == 0){
                                 /*if(new Date().getHours() >= 20 || new Date().getHours() < 7){
                                     $('#body').hide();
@@ -939,6 +952,7 @@
                                 }*/
                                 $("#powerGen").text('0.00 w');
                                 timeout = 600000; // 10 mins;
+                                checkAndSetSolarFlowDataTimeout();
                             }else{
                                 $('#body').show();
                                 $('html').on('click', function(){});
@@ -1019,7 +1033,7 @@
                         timeout = 600000; // 10 mins;
                     }
                     firstLoad = false; 
-                    
+                   
                     setTimeout(function () { load(); }, timeout);
                 })
                 .fail(failedLoading);
