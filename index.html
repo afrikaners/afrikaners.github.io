@@ -759,9 +759,6 @@
             }
 
             function checkAndSetSolarFlowDataTimeout(){
-                console.log('here');
-                console.log(new Date().getHours());
-                console.log(timeout);
                 if((new Date().getHours() >= 18 && new Date().getHours() <= 23) || (new Date().getHours() >= 5 && new Date().getHours() < 7)){
                     if(timeout === 600000){
                         setTimeout(function () { loadSolarFlowData(); }, 6000);
