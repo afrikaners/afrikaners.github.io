@@ -511,6 +511,7 @@
         var medsAlertSent9pm = false;
         var medsAlertSent10pm = false;
         var firstLoad = true;
+        var currentlyPerformingGet = false;
 
         var feedInKwhPay = 0.07135;
         var gridKwhPrice = 0.262026;
@@ -659,6 +660,14 @@
             }
 
             function airconStatus(){
+                if(currentlyPerformingGet){
+                    console.log('get busy. airconStatus');
+                    setTimeout(airconStatus, timeout);
+                    //something else is still loading something
+                    //skip this for now.
+                    return;
+                }
+
                 if(!monitorAirconStatus)
                     return;
 
@@ -666,13 +675,17 @@
                     return;
                 }
 
+                currentlyPerformingGet = true;
                 $.get("https://valuehold2.apphb.com/api/aircon", function (data) {
+                    currentlyPerformingGet = false;
                     if(data === "ON")
                         $("#airconStatus").show();
                     else
                         $("#airconStatus").hide();
 
                     setTimeout(airconStatus, timeout);
+                }).fail(function(){
+                    currentlyPerformingGet = false;
                 });
             }
 
@@ -712,14 +725,25 @@
             function checkAndSendAmMedsReminder(){
                 if(medsTaken || medsReminderSent)
                     return;
+                
+                if(currentlyPerformingGet){
+                    console.log('get busy. checkAndSendAmMedsReminder');
+                    //something else is still loading something
+                    //skip this for now.
+                    return;
+                }
 
+                currentlyPerformingGet = true;
                 $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                    currentlyPerformingGet = false;
                     if(data === false){
                         medsReminderSent = true;
                         sendNotification('Meds', "Boet, onthou jou medisyne!");
                     }else{
                         medsTaken = true;
                     }
+                }).fail(function(){
+                    currentlyPerformingGet = false;
                 });
             }
 
@@ -738,7 +762,16 @@
                     return;
                 }
 
+                if(currentlyPerformingGet){
+                    console.log('get busy. checkAndSendPmMedsAlert');
+                    //something else is still loading something
+                    //skip this for now.
+                    return;
+                }
+
+                currentlyPerformingGet = true;
                 $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                    currentlyPerformingGet = false;
                     if(data === false){
 
                         sendNotification('Meds', "Boet, Drink jou medisyne!");
@@ -754,6 +787,8 @@
                     }else{
                         medsTaken = true;
                     }
+                }).fail(function(){
+                    currentlyPerformingGet = false;
                 });
 
             }
@@ -772,8 +807,16 @@
             function loadSolarFlowData(){
                
                 checkAndSetSolarFlowDataTimeout();
+                if(currentlyPerformingGet){
+                    console.log('get busy. loadSolarFlowData');
+                    //something else is still loading something
+                    //skip this for now.
+                    return;
+                }
 
+                currentlyPerformingGet = true;
                 return $.get("https://valuehold2.apphb.com/api/solarflowdata",function(data){
+                            currentlyPerformingGet = false;
                             var dataString = JSON.stringify(data);
                             //console.log(dataString);
                             dataString = dataString.replace(/\\n/g, "");
@@ -837,7 +880,6 @@
                                     }
                                 }
                             }
-
                     });
             }
 
@@ -846,7 +888,13 @@
             }
 
             function load() {
-                
+                if(currentlyPerformingGet){
+                    console.log('get busy. load');
+                    setTimeout(function () { load(); }, 1000);
+                    //something else is still loading something
+                    //skip this for now.
+                    return;
+                }
                 try{
 
                     checkAlerts();
@@ -854,13 +902,21 @@
                    
                 }catch(ex){
                     console.log('exception');
+                    console.log(ex);
                     setTimeout(function () { load(); }, timeout);
                 }
             }
            
             function loadTheRest(){
-
+                if(currentlyPerformingGet){
+                    console.log('get busy. loadTheRest');
+                    //something else is still loading something
+                    //skip this for now.
+                    return;
+                }
+                currentlyPerformingGet = true;
                 $.get("https://valuehold2.apphb.com/api/values", function (data) {
+                    currentlyPerformingGet = false;
                     // alert( "Data Loaded: " +  );
                     var dataString = JSON.stringify(data);
                     //console.log(dataString);
@@ -1030,7 +1086,6 @@
                         timeout = 600000; // 10 mins;
                     }
                     firstLoad = false; 
-                   
                     setTimeout(function () { load(); }, timeout);
                 })
                 .fail(failedLoading);
@@ -1038,6 +1093,14 @@
             }
 
             function loadPVOutputData(forceUpdate){
+                if(currentlyPerformingGet){
+                    console.log('get busy. loadPVOutputData');
+                    setTimeout(function(){loadPVOutputData(false);}, 1000);
+                    //something else is still loading something
+                    //skip this for now.
+                    return;
+                }
+               
                 console.log("loadPVOutputData called");
                 if(!queryString["pvkey"]){
                     $('#actualStats').hide();
@@ -1073,7 +1136,9 @@
                 var url = "https://valuehold2.apphb.com/api/pvoutputdata?key=" + queryString["pvkey"] + "&df=" + dateFilter + "&dt="+dateFilter;
                 //console.log(url);
                 //var data = "28600,24138,28600,28600,28600,4.301,1,20200509,20200509,4.301,20200509,7236,2774,0,0,0,7236,7236,7236";
+                currentlyPerformingGet = true;
                 $.get(url,function(data){
+                    currentlyPerformingGet = false;
                     var array = data.split(',');
                     var totalGenerated = array[0];
                     var totalExport = array[1];
@@ -1167,6 +1232,7 @@
 
                 }).fail(function(error){
                     console.log("pv load error: " + error);
+                    currentlyPerformingGet = false;
                     $("#solarMeterData").hide();
                 });
 
@@ -1176,13 +1242,14 @@
 
             function failedLoading(){
                 console.log('fail');
+                        currentlyPerformingGet = false;
                         $('#afterhours').show();
                         $('#solarMeterData').hide();
                         $('#busyHours').hide();
                         $('#dayEnd_Error').show();
                         $('#stats').hide();
                         $("#dayEnd_Error").text("Error loading data from Server, probably no internet? ...");
-                        setTimeout(function () { load(); loadWeather();}, timeout);
+                        setTimeout(function () { load(); }, timeout);
             }
         
         });
