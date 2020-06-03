@@ -660,18 +660,19 @@
             }
 
             function airconStatus(){
+                console.log('reached airconStatus');
+                if(!monitorAirconStatus)
+                    return;
+
+                if(new Date().getHours() > 18 || new Date().getHours()< 7){
+                    return;
+                }
+
                 if(currentlyPerformingGet){
                     console.log('get busy. airconStatus');
                     setTimeout(airconStatus, timeout);
                     //something else is still loading something
                     //skip this for now.
-                    return;
-                }
-
-                if(!monitorAirconStatus)
-                    return;
-
-                if(new Date().getHours() > 18 || new Date().getHours()< 7){
                     return;
                 }
 
@@ -723,6 +724,7 @@
             }
 
             function checkAndSendAmMedsReminder(){
+                console.log('reached checkAndSendAmMedsReminder');
                 if(medsTaken || medsReminderSent)
                     return;
                 
@@ -748,6 +750,7 @@
             }
 
             function checkAndSendPmMedsAlert(nowHour){
+                console.log('reached checkAndSendPmMedsAlert');
                 if(medsTaken || allMedsAlertsSent)
                     return;
 
@@ -796,7 +799,7 @@
             function checkAndSetSolarFlowDataTimeout(){
                 if((new Date().getHours() >= 18 && new Date().getHours() <= 23) || (new Date().getHours() >= 5 && new Date().getHours() < 7)){
                     if(timeout === 600000){
-                        setTimeout(function () { loadSolarFlowData(); }, 6000);
+                        setTimeout(function () { loadSolarFlowData(true); }, 6000);
                         //only run this 6 second interval IF the overall timeout runs every 10mins.
                         //E.g. the hours is between 18 and 23 or 5am - 7am  AND the app is definitely in it's 10 min refresh mode
                         //then we need this data to still refresh every 6 seconds.
@@ -804,9 +807,10 @@
                 }
             }
 
-            function loadSolarFlowData(){
-               
-                checkAndSetSolarFlowDataTimeout();
+            function loadSolarFlowData(setSolarFlowTimer){
+                console.log('reached loadSolarFlowData');
+                if(setSolarFlowTimer)
+                    checkAndSetSolarFlowDataTimeout();
                 if(currentlyPerformingGet){
                     console.log('get busy. loadSolarFlowData');
                     //something else is still loading something
@@ -888,9 +892,10 @@
             }
 
             function load() {
+                console.log('reached load...');
                 if(currentlyPerformingGet){
                     console.log('get busy. load');
-                    setTimeout(function () { load(); }, 1000);
+                    setTimeout(function () { load(); }, 6000);
                     //something else is still loading something
                     //skip this for now.
                     return;
@@ -898,7 +903,7 @@
                 try{
 
                     checkAlerts();
-                    loadSolarFlowData().done(loadTheRest).fail(failedLoading);
+                    loadSolarFlowData(false).done(loadTheRest).fail(failedLoading);
                    
                 }catch(ex){
                     console.log('exception');
@@ -908,6 +913,7 @@
             }
            
             function loadTheRest(){
+                console.log('reached loadTheRest');
                 if(currentlyPerformingGet){
                     console.log('get busy. loadTheRest');
                     //something else is still loading something
@@ -1093,6 +1099,7 @@
             }
 
             function loadPVOutputData(forceUpdate){
+                console.log('reached loadPVOutputData');
                 if(currentlyPerformingGet){
                     console.log('get busy. loadPVOutputData');
                     setTimeout(function(){loadPVOutputData(false);}, 1000);
@@ -1100,8 +1107,7 @@
                     //skip this for now.
                     return;
                 }
-               
-                console.log("loadPVOutputData called");
+
                 if(!queryString["pvkey"]){
                     $('#actualStats').hide();
                     $('#estimateLiveCost').hide();
