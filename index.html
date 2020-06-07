@@ -677,8 +677,8 @@
                     });*/
 
                     loadTheRest().done(function(){
-                        checkAlerts().fail(function(){ currentlyPerformingGet = false;});
-                        airconStatus().fail(function(){ currentlyPerformingGet = false;});
+                        checkAlerts();
+                        airconStatus();
                         setTimeout(monitorNetworkRequests, 4000);
 
                     }).fail(failedLoading);
@@ -772,14 +772,14 @@
             function airconStatus(){
                 log('reached airconStatus');
                 if(!monitorAirconStatus)
-                    return Promise.resolve();;
+                    return;
 
                 if(new Date().getHours() > 18 || new Date().getHours()< 7){
-                    return Promise.resolve();;
+                    return;
                 }
 
                 currentlyPerformingGet = true;
-                return $.get("https://valuehold2.apphb.com/api/aircon", function (data) {
+                $.get("https://valuehold2.apphb.com/api/aircon", function (data) {
                     currentlyPerformingGet = false;
                     getRequestPerformed();
                     if(data === "ON")
@@ -787,6 +787,8 @@
                     else
                         $("#airconStatus").hide();
 
+                }).fail(function(){
+                    currentlyPerformingGet = false;
                 });
             }
 
@@ -814,22 +816,23 @@
 
                 //10am reminder if meds not taken yet.
                 if(nowHour  === 10)
-                    return checkAndSendAmMedsReminder();
+                     checkAndSendAmMedsReminder();
                 
 
                 //8pm, 9pm & 10pm reminder if meds still not taken.
                 if(nowHour === 20 || nowHour  === 21 || nowHour  === 22)
-                    return checkAndSendPmMedsAlert(nowHour);
+                     checkAndSendPmMedsAlert(nowHour);
 
+                
             }
 
             function checkAndSendAmMedsReminder(){
                 log('reached checkAndSendAmMedsReminder');
                 if(medsTaken || medsReminderSent)
-                    return Promise.resolve();
+                    return;
 
                 currentlyPerformingGet = true;
-                return $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                $.get("https://valuehold2.apphb.com/api/meds", function (data) {
                     currentlyPerformingGet = false;
                     getRequestPerformed();
                     if(data === false){
@@ -838,27 +841,29 @@
                     }else{
                         medsTaken = true;
                     }
+                }).fail(function(){
+                    currentlyPerformingGet = false;
                 });
             }
 
             function checkAndSendPmMedsAlert(nowHour){
                 log('reached checkAndSendPmMedsAlert');
                 if(medsTaken || allMedsAlertsSent)
-                    return Promise.resolve();;
+                    return ;
 
                 if(!(nowHour === 20 || nowHour === 21 || nowHour === 22 ))
-                    return Promise.resolve();;
+                    return;
 
                 if(nowHour === 20 && medsAlertSent8pm){
-                    return Promise.resolve();;
+                    return ;
                 } else if(nowHour === 21 && medsAlertSent9pm){
-                    return Promise.resolve();;
+                    return ;
                 } else if(nowHour === 22 && medsAlertSent10pm){
-                    return Promise.resolve();;
+                    return ;
                 }
 
                 currentlyPerformingGet = true;
-                return $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                 $.get("https://valuehold2.apphb.com/api/meds", function (data) {
                     currentlyPerformingGet = false;
                     getRequestPerformed();
                     if(data === false){
@@ -876,6 +881,8 @@
                     }else{
                         medsTaken = true;
                     }
+                }).fail(function(){
+                    currentlyPerformingGet = false;
                 });
             }
 
