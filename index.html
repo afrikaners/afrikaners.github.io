@@ -667,14 +667,22 @@
 
                 loadSolarFlowData().done(function(){
 
-                    var promise1 = checkAlerts();
+                    /*var promise1 = checkAlerts();
                     var promise2 = airconStatus();
                     var promise3 = loadTheRest();
 
                     Promise.all([promise1, promise2, promise3]).then((values) => {
                         currentlyPerformingGet = false;
                         setTimeout(monitorNetworkRequests, 4000);
-                    });
+                    });*/
+
+                    loadTheRest().done(function(){
+                        checkAlerts().fail(function(){ currentlyPerformingGet = false;});
+                        airconStatus().fail(function(){ currentlyPerformingGet = false;});
+                        setTimeout(monitorNetworkRequests, 4000);
+
+                    }).fail(failedLoading);
+                    
 
                 }).fail(failedLoading);
                 
@@ -980,7 +988,7 @@
                         }else{
                             $('#afterhours').hide();
                             $('#totalForTodayBlock').show();
-                            if($('#estimateLiveCost').is(':visible')){
+                            if($('#estimateLiveCost').is(':visible') && queryString[]){
                                 $('#solarMeterData').show();
                             }else{
                                 $('#solarMeterData').hide();
