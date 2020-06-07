@@ -695,7 +695,7 @@
                     return 0;
 
                 var now = new Date();
-                var dif = now.getTime() - dateTimeLastGetRequestMade.getTime();
+                var dif = now.getTime() - pastDate.getTime();
 
                 var Seconds_from_T1_to_T2 = dif / 1000;
                     return Math.abs(Seconds_from_T1_to_T2);
