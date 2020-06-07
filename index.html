@@ -667,12 +667,14 @@
 
                 loadSolarFlowData().done(function(){
 
-                    loadTheRest().done(function(){
-                        checkAlerts();
-                        airconStatus();
+                    var promise1 = checkAlerts();
+                    var promise2 = airconStatus();
+                    var promise3 = loadTheRest();
 
+                    Promise.all([promise1, promise2, promise3]).then((values) => {
+                        currentlyPerformingGet = false;
                         setTimeout(monitorNetworkRequests, 4000);
-                    }).fail(failedLoading);
+                    });
 
                 }).fail(failedLoading);
                 
@@ -762,14 +764,14 @@
             function airconStatus(){
                 log('reached airconStatus');
                 if(!monitorAirconStatus)
-                    return;
+                    return Promise.resolve();;
 
                 if(new Date().getHours() > 18 || new Date().getHours()< 7){
-                    return;
+                    return Promise.resolve();;
                 }
 
                 currentlyPerformingGet = true;
-                $.get("https://valuehold2.apphb.com/api/aircon", function (data) {
+                return $.get("https://valuehold2.apphb.com/api/aircon", function (data) {
                     currentlyPerformingGet = false;
                     getRequestPerformed();
                     if(data === "ON")
@@ -777,8 +779,6 @@
                     else
                         $("#airconStatus").hide();
 
-                }).fail(function(){
-                    currentlyPerformingGet = false;
                 });
             }
 
@@ -806,22 +806,22 @@
 
                 //10am reminder if meds not taken yet.
                 if(nowHour  === 10)
-                    checkAndSendAmMedsReminder();
+                    return checkAndSendAmMedsReminder();
                 
 
                 //8pm, 9pm & 10pm reminder if meds still not taken.
                 if(nowHour === 20 || nowHour  === 21 || nowHour  === 22)
-                    checkAndSendPmMedsAlert(nowHour);
+                    return checkAndSendPmMedsAlert(nowHour);
 
             }
 
             function checkAndSendAmMedsReminder(){
                 log('reached checkAndSendAmMedsReminder');
                 if(medsTaken || medsReminderSent)
-                    return;
+                    return Promise.resolve();
 
                 currentlyPerformingGet = true;
-                $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                return $.get("https://valuehold2.apphb.com/api/meds", function (data) {
                     currentlyPerformingGet = false;
                     getRequestPerformed();
                     if(data === false){
@@ -830,36 +830,27 @@
                     }else{
                         medsTaken = true;
                     }
-                }).fail(function(){
-                    currentlyPerformingGet = false;
                 });
             }
 
             function checkAndSendPmMedsAlert(nowHour){
                 log('reached checkAndSendPmMedsAlert');
                 if(medsTaken || allMedsAlertsSent)
-                    return;
+                    return Promise.resolve();;
 
                 if(!(nowHour === 20 || nowHour === 21 || nowHour === 22 ))
-                    return;
+                    return Promise.resolve();;
 
                 if(nowHour === 20 && medsAlertSent8pm){
-                    return;
+                    return Promise.resolve();;
                 } else if(nowHour === 21 && medsAlertSent9pm){
-                    return;
+                    return Promise.resolve();;
                 } else if(nowHour === 22 && medsAlertSent10pm){
-                    return;
-                }
-
-                if(currentlyPerformingGet){
-                    log('get busy. checkAndSendPmMedsAlert');
-                    //something else is still loading something
-                    //skip this for now.
-                    return;
+                    return Promise.resolve();;
                 }
 
                 currentlyPerformingGet = true;
-                $.get("https://valuehold2.apphb.com/api/meds", function (data) {
+                return $.get("https://valuehold2.apphb.com/api/meds", function (data) {
                     currentlyPerformingGet = false;
                     getRequestPerformed();
                     if(data === false){
@@ -877,10 +868,7 @@
                     }else{
                         medsTaken = true;
                     }
-                }).fail(function(){
-                    currentlyPerformingGet = false;
                 });
-
             }
 
             function loadSolarFlowData(){
